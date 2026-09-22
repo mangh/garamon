@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 
 project(cmake_project_name_original_case CXX)
 set(CMAKE_BUILD_TYPE Release)
