@@ -5,13 +5,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 # include eigen
 find_package(Eigen3 REQUIRED)
-if(${EIGEN3_FOUND})
-    message(STATUS "lib EIGEN3 found")
-    message(STATUS "  version " ${EIGEN3_VERSION_STRING})
-    message(STATUS "  include " ${EIGEN3_INCLUDE_DIR})
-else()
-    include_directories("/usr/include/eigen3") # manually specify the include location
-endif()
+message(STATUS "lib EIGEN3 found")
 
 
 # python binding
@@ -56,6 +50,12 @@ else()
 	add_library(cmake_project_name_original_case SHARED ${source_files} ${header_files})
 endif()
 
+if(TARGET Eigen3::Eigen)
+    target_link_libraries(cmake_project_name_original_case PUBLIC Eigen3::Eigen)
+else()
+    include_directories(${EIGEN3_INCLUDE_DIR})
+endif()
+
 if (BUILD_PYTHON)
     pybind11_add_module(cmake_project_name_original_case_py 
         src/cmake_project_name_original_case/PythonBindings.cpp
@@ -78,7 +78,6 @@ set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
 
 # include directory path
 include_directories(src)
-include_directories(${EIGEN3_INCLUDE_DIR})
 
 # install lib
 install(FILES ${header_files} ${source_files} DESTINATION /usr/local/include/cmake_project_name_original_case)
