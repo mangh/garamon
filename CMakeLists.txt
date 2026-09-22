@@ -20,7 +20,6 @@ if(TARGET Eigen3::Eigen)
     message(STATUS "lib EIGEN3 ${Eigen3_VERSION} found")
     target_link_libraries(garamon_generator PRIVATE Eigen3::Eigen)
 else()
-    message(STATUS "lib EIGEN3 found")
     include_directories(${EIGEN3_INCLUDE_DIR})
 endif()
 

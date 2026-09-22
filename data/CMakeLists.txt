@@ -5,7 +5,6 @@ set(CMAKE_BUILD_TYPE Release)
 
 # include eigen
 find_package(Eigen3 REQUIRED)
-message(STATUS "lib EIGEN3 found")
 
 
 # python binding
@@ -51,6 +50,7 @@ else()
 endif()
 
 if(TARGET Eigen3::Eigen)
+    message(STATUS "lib EIGEN3 ${Eigen3_VERSION} found")
     target_link_libraries(cmake_project_name_original_case PUBLIC Eigen3::Eigen)
 else()
     include_directories(${EIGEN3_INCLUDE_DIR})
