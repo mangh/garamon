@@ -17,6 +17,7 @@ Install
 ## Dependencies
     * 'Eigen 3.3.4'  or more [Eigen](http://eigen.tuxfamily.org)
     * 'Cmake 3.10' or more
+    * 'pybind11' (only for building the Python bindings of a generated library, install with 'pip install pybind11')
 
 ## Compiler tested
     * gcc 5.4.0
@@ -71,7 +72,7 @@ Usage
 ## Run the Python binding sample for a specific algebra for UNIX system
 Let us consider the considered algebra is CGA of R3 corresponding to the configuration file c3ga.conf. 
 
-    * Check the dependencies
+    * Check the dependencies (in particular `pip install pybind11`)
     * From Garamon Generator root directory
     	* 'mkdir build'
     	* 'cd build'
@@ -83,6 +84,12 @@ Let us consider the considered algebra is CGA of R3 corresponding to the configu
     	* 'python setup.py install'
     	* 'cd sample'
     	* 'python sample.py'
+
+Note for Windows: the global site-packages directory (under `Program Files`) usually requires an admin shell to write to.
+Either run `python setup.py install --user` to install to your per-user site-packages instead,
+or run the command from an elevated (Administrator) terminal,
+or install into a virtual environment (`python -m venv .venv`, activate it, then `pip install .`).
+
 
 Notes
 =====

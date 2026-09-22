@@ -6,7 +6,9 @@ import subprocess
 
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
+from packaging.version import parse as parse_version
+
+import pybind11
 
 
 class CMakeExtension(Extension):
@@ -25,9 +27,9 @@ class CMakeBuild(build_ext):
                 ", ".join(e.name for e in self.extensions))
 
         if platform.system() == "Windows":
-            cmake_version = LooseVersion(
+            cmake_version = parse_version(
                 re.search(r'version\s*([\d.]+)', out.decode()).group(1))
-            if cmake_version < '3.1.0':
+            if cmake_version < parse_version('3.1.0'):
                 raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
         for ext in self.extensions:
@@ -39,7 +41,8 @@ class CMakeBuild(build_ext):
         cmake_args = [
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
             '-DPYTHON_EXECUTABLE=' + sys.executable,
-            '-DBUILD_PYTHON=ON'
+            '-DBUILD_PYTHON=ON',
+            '-Dpybind11_DIR=' + pybind11.get_cmake_dir()
         ]
 
         cfg = 'Debug' if self.debug else 'Release'
