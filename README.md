@@ -16,7 +16,8 @@ Install
 
 ## Dependencies
     * 'Eigen 3.3.4'  or more [Eigen](http://eigen.tuxfamily.org)
-    * 'Cmake 3.10' or more
+    * 'CLI11 2.7.2'  or more [CLI11](https://github.com/CLIUtils/CLI11)
+    * 'CMake 3.10' or more
     * 'pybind11' (only for building the Python bindings of a generated library, install with 'pip install pybind11')
 
 ## Compiler tested
@@ -61,11 +62,26 @@ Install
 Usage
 =====
 
+```sh
+~/garamon/build$ ./garamon_generator --help
+GARAMON: Geometric Algebra Recursive and Adaptative MONster Generator
+
+./garamon_generator [OPTIONS]
+
+OPTIONS:
+  -h,  --help                      Print this help message and exit
+  -c,  --config REQUIRED           Configuration file, e.g. "garamond/conf/c3ga.conf"
+  -t,  --template REQUIRED         Template directory, e.g. "garamond/data/"
+  -o,  --output REQUIRED           Output directory, e.g. "garamond/build/output/"
+
+~/garamon/build$
+```
+
 ## Generate a library
 
     * define the algebra to generate: chose a configuration file (.conf) on the 'conf' directory or create your own.
     * run the binary executable (from the 'build' directory) with the configuration file as argument
-      > ./garamon_generator file.conf
+      > ./garamon_generator -c ../conf/ga.conf -t ../data/ -o ./output/
     * the generated library is located in 'build/output' directory
     * to install the generated library, see its README.md
 
@@ -78,14 +94,14 @@ Let us consider the considered algebra is CGA of R3 corresponding to the configu
     	* 'cd build'
     	* 'cmake ..'
     	* 'make'
-    	* './garamon_generator ../conf/c3ga.conf'
+        * './garamon_generator -c ../conf/c3ga.conf -t ../data/ -o ./output/'
     	* 'cd output/garamon_c3ga/'
     	* 'python setup.py build'
-    	* 'python setup.py install'
+    	* 'python setup.py install' (¹)
     	* 'cd sample'
     	* 'python sample.py'
 
-Note for Windows: the global site-packages directory (under `Program Files`) usually requires an admin shell to write to.
+(1) Note for Windows: the global site-packages directory (under `Program Files`) usually requires an admin shell to write to.
 Either run `python setup.py install --user` to install to your per-user site-packages instead,
 or run the command from an elevated (Administrator) terminal,
 or install into a virtual environment (`python -m venv .venv`, activate it, then `pip install .`).

@@ -15,27 +15,39 @@
 #include <iostream>
 #include <algorithm>
 
+#include <CLI/CLI.hpp>
 #include "MetaData.hpp"
 #include "Directory.hpp"
 #include "Utilities.hpp"
 #include "ProductToString.hpp"
 
 
-
 int main(int argc, char** argv){
 
-    // check the program arguments
-    if(argc != 2){
-        std::cerr << "usage: " << argv[0] << " file.conf" << std::endl;
-        std::cerr << "where 'file.conf' is the file that defines your algebra." << std::endl;
-        return EXIT_FAILURE;;
-    }
+    // get the program arguments
+    CLI::App app{"GARAMON: Geometric Algebra Recursive and Adaptative MONster Generator"};
+    argv = app.ensure_utf8(argv);
 
-    // configuration file
-    const std::string configurationFilesDirectory = argv[1];
-    
-    const std::string templateDataDirectory = "../data/";
-    const std::string outputDirectory = "output/";
+    app.get_formatter()->column_width(35);
+    app.get_formatter()->enable_option_type_names(false);
+    app.get_formatter()->long_option_alignment_ratio(1.0/5.0);
+
+    std::string configurationFilesDirectory;
+    app.add_option("-c,--config", configurationFilesDirectory, "Configuration file, e.g. \"garamond/conf/c3ga.conf\"")
+        ->check(CLI::ExistingFile)
+        ->required();
+
+    std::string templateDataDirectory;
+    app.add_option("-t,--template", templateDataDirectory, "Template directory, e.g. \"garamond/data/\"")
+        ->check(CLI::ExistingDirectory)
+        ->required();
+
+    std::string outputDirectory;
+    app.add_option("-o,--output", outputDirectory, "Output directory, e.g. \"garamond/build/output/\"")
+        ->check(CLI::ExistingDirectory)
+        ->required();
+
+    CLI11_PARSE(app, argc, argv);    
 
     // read the configuration data
     std::cout << "load meta data ..." << std::endl;
