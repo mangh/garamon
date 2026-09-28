@@ -8,10 +8,7 @@ find_package(Eigen3 REQUIRED)
 
 
 # python binding
-#option(BUILD_PYTHON "Build Python library" OFF)
-if (BUILD_PYTHON)
-    find_package(pybind11 REQUIRED)
-endif()
+option(BUILD_PYTHON "Build the Python binding (requires Python 3 and pybind11)" OFF)
 
 
 # call the CMakeLists.txt to make the documentation (Doxygen)
@@ -57,11 +54,47 @@ else()
 endif()
 
 if (BUILD_PYTHON)
-    pybind11_add_module(cmake_project_name_original_case_py 
+    if (CMAKE_VERSION VERSION_LESS 3.18)
+        message(FATAL_ERROR "BUILD_PYTHON requires CMake 3.18 or more")
+    endif()
+
+    # the Python used to build the module is the one that will import it (an active venv is honoured)
+    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+
+    # locate pybind11 installed with 'pip install pybind11'
+    execute_process(COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmakedir
+                    OUTPUT_VARIABLE pybind11_cmake_dir
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_QUIET)
+    set(PYBIND11_FINDPYTHON ON)
+    find_package(pybind11 CONFIG REQUIRED HINTS "${pybind11_cmake_dir}")
+
+    # standalone module (the library is header-only in practice): no runtime dependency on the shared library
+    pybind11_add_module(cmake_project_name_original_case_py
         src/cmake_project_name_original_case/PythonBindings.cpp
+        src/cmake_project_name_original_case/Mvec.cpp
     )
-    target_link_libraries(cmake_project_name_original_case_py PRIVATE 
-        cmake_project_name_original_case)
+    target_include_directories(cmake_project_name_original_case_py PRIVATE src)
+    target_compile_features(cmake_project_name_original_case_py PRIVATE cxx_std_14)
+    if(TARGET Eigen3::Eigen)
+        target_link_libraries(cmake_project_name_original_case_py PRIVATE Eigen3::Eigen)
+    else()
+        target_include_directories(cmake_project_name_original_case_py PRIVATE ${EIGEN3_INCLUDE_DIR})
+    endif()
+
+    # > 'cmake --install build --component python' to install the module into the site-packages
+    set(PYTHON_INSTALL_DIR "${Python_SITEARCH}" CACHE PATH "Installation directory of the Python module")
+    install(TARGETS cmake_project_name_original_case_py
+            LIBRARY DESTINATION "${PYTHON_INSTALL_DIR}" COMPONENT python
+            RUNTIME DESTINATION "${PYTHON_INSTALL_DIR}" COMPONENT python)
+
+    # > 'cmake --build build --target python_sample' to run sample/sample.py with the just-built module
+    add_custom_target(python_sample
+        COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=$<TARGET_FILE_DIR:cmake_project_name_original_case_py>"
+                "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/sample/sample.py"
+        DEPENDS cmake_project_name_original_case_py
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sample"
+        VERBATIM)
 endif()
 
 # compilation flags

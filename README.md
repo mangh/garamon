@@ -18,7 +18,7 @@ Install
     * 'Eigen 3.3.4'  or more [Eigen](http://eigen.tuxfamily.org)
     * 'CLI11 2.7.2'  or more [CLI11](https://github.com/CLIUtils/CLI11)
     * 'CMake 3.10' or more
-    * 'pybind11' (only for building the Python bindings of a generated library, install with 'pip install pybind11')
+    * 'pybind11' (only for building the Python bindings of a generated library, install with 'pip install pybind11'; requires CMake 3.18 or more)
 
 ## Compiler tested
     * gcc 5.4.0
@@ -85,10 +85,10 @@ OPTIONS:
     * the generated library is located in 'build/output' directory
     * to install the generated library, see its README.md
 
-## Run the Python binding sample for a specific algebra for UNIX system
+## Run the Python binding sample for a specific algebra
 Let us consider the considered algebra is CGA of R3 corresponding to the configuration file c3ga.conf. 
 
-    * Check the dependencies (in particular `pip install pybind11`)
+    * Check the dependencies (in particular `pip install pybind11`, Python 3 development headers and CMake 3.18 or more)
     * From Garamon Generator root directory
     	* 'mkdir build'
     	* 'cd build'
@@ -96,15 +96,19 @@ Let us consider the considered algebra is CGA of R3 corresponding to the configu
     	* 'make'
         * './garamon_generator -c ../conf/c3ga.conf -t ../data/ -o ./output/'
     	* 'cd output/garamon_c3ga/'
-    	* 'python setup.py build'
-    	* 'python setup.py install' (¹)
-    	* 'cd sample'
-    	* 'python sample.py'
+    	* 'cmake -S . -B build -DBUILD_PYTHON=ON' (¹)
+    	* 'cmake --build build --config Release'
+    	* 'cmake --build build --config Release --target python_sample' (runs 'sample/sample.py' with the just-built module)
+    	* (optional) 'cmake --install build --config Release --component python' (²) to make the module importable from anywhere, then:
+    		* 'cd sample'
+    		* 'python sample.py'
 
-(1) Note for Windows: the global site-packages directory (under `Program Files`) usually requires an admin shell to write to.
-Either run `python setup.py install --user` to install to your per-user site-packages instead,
-or run the command from an elevated (Administrator) terminal,
-or install into a virtual environment (`python -m venv .venv`, activate it, then `pip install .`).
+(1) The `cmake -S ...` command requires the Eigen3 library. It will fail if it can't find it.
+You might need to add the `-DCMAKE_PREFIX_PATH=/path/to/eigen3` parameter to point to where the library is.
+
+(2) The module is installed into the site-packages of the Python interpreter found by CMake, which usually requires admin rights (`sudo`, or an elevated terminal on Windows).
+Either install to your per-user site-packages instead, by adding `-DPYTHON_INSTALL_DIR="$(python -m site --user-site)"` to the `cmake -S ...` command,
+or activate a virtual environment (`python -m venv .venv`) before the `cmake -S ...` command: CMake then uses it and installs the module there.
 
 
 Notes

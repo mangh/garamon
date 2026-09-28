@@ -389,12 +389,6 @@ int main(int argc, char** argv){
     ));
     writeFile(data, srcDirectory + "/PythonBindings.cpp");
 
-    // setup.py
-    data = readFile(templateDataDirectory + "setup.py");
-    substitute(data,"project_namespace_py", metaData.namespaceName + "_py");
-    writeFile(data, projectDirectory + "/setup.py");
-
-
     // sample.py
     data = readFile(templateDataDirectory + "sample/sample.py");
     substitute(data,"project_namespace_py", metaData.namespaceName + "_py");
