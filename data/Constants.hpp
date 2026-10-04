@@ -64,9 +64,9 @@ namespace project_namespace{
 project_array_xorIndexConversion
 
 project_dual_arrays_permutations_and_coefficients
-project_dual_arrays_recursive_coefficients
 
 project_pseudo_scalar_inverse
+    constexpr bool fastDualAvailable = project_fast_dual_available; /*!< true if the dual of each basis blade is a single basis blade (computed with a permutation and a scaling), else the dual is computed from its definition */
     const int project_sign_reverse; /*!< array of signs to avoid the computation of (-1)^k*(k-1)/2 during the reverse operation */
 
     const std::vector<std::string> basisVectors = project_basis_vectors_string; /*!< name of the basis vectors (of grade 1) */

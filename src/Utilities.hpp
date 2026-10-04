@@ -15,6 +15,9 @@
 #ifndef GARAMON_UTILITY_HPP_H
 #define GARAMON_UTILITY_HPP_H
 
+#include <string>
+#include <vector>
+
 #include "ProductTools.hpp"
 
 
@@ -60,5 +63,8 @@ std::vector<unsigned int> getSetOfCombinationsFromXorIndexation(const int dim, c
 std::vector<std::vector<unsigned int> > generateCombinations(const unsigned int n, const unsigned int r);
 
 
+
+// convert a double to a string without any precision loss (unlike std::to_string that keeps only 6 decimals), i.e. "0.5", "-2", "0.33333333333333331"
+std::string doubleToString(const double value);
 
 #endif //GARAMON_UTILITY_HPP_H

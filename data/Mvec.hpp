@@ -88,7 +88,7 @@ namespace project_namespace{
         /// \brief Copy constructor of Mvec from different types
         /// \param mv - the multivector with another template type
         template<typename U>
-        Mvec<T>(const Mvec<U> &mv);
+        Mvec(const Mvec<U> &mv);
 
         /// \brief Constructor of Mvec from a scalar
         /// \param val - scalar value
@@ -330,7 +330,7 @@ namespace project_namespace{
         template<typename U>
         friend Mvec<U> operator~(const Mvec<U> &mv);
 
-        /// \brief the dual of a k-vector is defined as $A_k^* = A_k \\lcont I_n^{-1}$, for a multivector, we just dualize all its components. If the metric is degenerated, this function computes the right complement (mv ^ !mv = I).
+        /// \brief the dual of a k-vector is defined as $A_k^* = A_k \\lcont I_n$ (left contraction onto the pseudo-scalar), for a multivector, we just dualize all its components. If the metric is degenerated, this function computes the right complement (mv ^ !mv = I).
         /// \param mv - a multivector
         /// \return the dual of mv
         template<typename U>
@@ -339,7 +339,7 @@ namespace project_namespace{
         /// \brief boolean operator that tests the equality between two Mvec
         /// \param mv2 - second operand of type Mvec
         /// \return whether two Mvec have the same coefficients
-        inline bool operator==(const Mvec& mv2){
+        inline bool operator==(const Mvec& mv2) const {
             if(gradeBitmap != mv2.gradeBitmap)
                 return false;
 
@@ -354,7 +354,7 @@ namespace project_namespace{
             /// \brief operator to test whether two Mvec have not the same coefficients
         /// \param mv2 - second operand of type Mvec
         /// \return boolean that specify the non-equality between two Mvec
-        inline bool operator!=(const Mvec& mv2){
+        inline bool operator!=(const Mvec& mv2) const {
             return !(*this == mv2); // issue #4 fixed by replacing Not !(mvData == mv2.mvData) with !(*this == mv2)
         }
 
@@ -367,7 +367,7 @@ namespace project_namespace{
 
         /// \brief overload the casting operator, using this function, it is now possible to compute : float a = float(mv);
         /// \return the scalar part of the multivector
-        operator T () {
+        operator T () const {
             // if no scalar part, return
 
             if( (gradeBitmap & 1) == 0 )
@@ -527,6 +527,17 @@ namespace project_namespace{
 
 
         /// \cond DEV
+        /// \brief remove the k-vector pointed by 'it' if all its components are 0: the result of an operation never contains null k-vectors (the empty multivector is 0).
+        /// \param it - iterator on a k-vector of this multivector
+        inline void eraseIfNull(typename std::list<Kvec<T>>::iterator it){
+            if(!((it->vec.array() != T(0)).any())){
+                gradeBitmap &= ~(1u << it->grade);
+                mvData.erase(it);
+            }
+        }
+        /// \endcond // do not comment this functions
+
+        /// \cond DEV
         /// \brief modify the element of the multivector whose grade is "grade"
         /// \param grade : the grade to access
         /// \param indexVectorXd : index of the k-vector (with k = "grade")
@@ -564,7 +575,7 @@ namespace project_namespace{
             return ( this->reverse() > (*this) );
         }
 
-        /// \brief compute the dual of a multivector (i.e mv* = reverse(mv) * Iinv). If the metric is degenerated, this function computes the right complement (mv ^ !mv = I).
+        /// \brief compute the dual of a multivector (i.e. mv* = mv < I, the left contraction of mv onto the pseudo-scalar). If the metric is degenerated, this function computes the right complement (mv ^ !mv = I).
         /// \return - the dual of the multivector
         Mvec<T> dual() const;
 
@@ -692,7 +703,8 @@ namespace project_namespace{
         Mvec extractOneComponent(const int grade, const int sizeOfKVector, const int indexInKvector) const {
             Mvec mv;
             auto itThisMV = this->findGrade(grade);
-            if(itThisMV==this->mvData.end()){
+            // null component: the result is the empty multivector
+            if(itThisMV==this->mvData.end() || itThisMV->vec.coeff(indexInKvector) == T(0)){
                 return mv;
             }
             mv = mv.componentToOne(grade,indexInKvector);
@@ -747,7 +759,7 @@ project_multivector_one_component
 
     template<typename T>
     template<typename U>
-    Mvec<T>::Mvec(const U val) {
+    Mvec<T>::Mvec(const U val) : gradeBitmap(0) {
         if(val != U(0)) {
             gradeBitmap = 1;
             Kvec<T> kvec;
@@ -787,6 +799,7 @@ project_multivector_one_component
         for(auto & itMv : mv2.mvData) {
             auto it = mv3.createVectorXdIfDoesNotExist(itMv.grade);
             it->vec += itMv.vec;
+            mv3.eraseIfNull(it);
         }
         return mv3;
     }
@@ -805,6 +818,7 @@ project_multivector_one_component
         if(value != T(0)) {
             auto it = mv.createVectorXdIfDoesNotExist(0);
             it->vec.coeffRef(0) += value;
+            mv.eraseIfNull(it);
         }
         return mv;
     }
@@ -832,6 +846,7 @@ project_multivector_one_component
         for(auto & itMv : mv2.mvData) {
             auto it = mv3.createVectorXdIfDoesNotExist(itMv.grade);
             it->vec -= itMv.vec;
+            mv3.eraseIfNull(it);
         }
         return mv3;
     }
@@ -857,6 +872,7 @@ project_multivector_one_component
         if(value != T(0)) {
             auto it = mv.createVectorXdIfDoesNotExist(0);
             it->vec.coeffRef(0) -= value;
+            mv.eraseIfNull(it);
         }
         return mv;
     }
@@ -889,6 +905,7 @@ project_multivector_one_component
                 if(itMv1.grade + itMv2.grade <= (int) algebraDimension ){
                     auto itMv3 = mv3.createVectorXdIfDoesNotExist(itMv1.grade + itMv2.grade);
                     outerFunctionsContainer<T>[itMv1.grade][itMv2.grade](itMv1.vec, itMv2.vec, itMv3->vec);
+                    mv3.eraseIfNull(itMv3);
                 }
             }
         return mv3;
@@ -1084,83 +1101,21 @@ project_multivector_one_component
 
 
 project_singular_metric_comment_begin
+    // the dual of a multivector is a cheap operation (permutation and scaling of its components), and the outer product
+    // relies on the precomputed products: these "outer product with dual" operations are directly computed from their definition.
     template<typename T>
     Mvec<T> Mvec<T>::outerPrimalDual(const Mvec<T> &mv2) const{
-        Mvec<T> mv3;
-
-        for(const auto & itMv1 : this->mvData)    // all per-grade component of mv1
-            for(const auto & itMv2 : mv2.mvData)  // all per-grade component of mv2
-            {
-                unsigned int grade_mv3 = itMv1.grade + (algebraDimension-itMv2.grade);
-                if(grade_mv3 <= algebraDimension) {
-                    // handle the scalar product as well as the left contraction
-                    auto itMv3 = mv3.createVectorXdIfDoesNotExist(grade_mv3);
-                    outerProductPrimalDual(itMv1.vec, itMv2.vec, itMv3->vec,
-                                           itMv1.grade, itMv2.grade, (unsigned)(algebraDimension-grade_mv3));
-
-                    // check if the result is non-zero
-                    if(!((itMv3->vec.array() != 0.0).any())){
-                        mv3.mvData.erase(itMv3);
-                        mv3.gradeBitmap &= ~(1<<grade_mv3);
-                    }
-                }
-            }
-
-        return mv3;
+        return (*this) ^ mv2.dual();
     }
 
     template<typename T>
     Mvec<T> Mvec<T>::outerDualPrimal(const Mvec<T> &mv2) const{
-        Mvec<T> mv3;
-
-        for(const auto & itMv1 : this->mvData)    // all per-grade component of mv1
-            for(const auto & itMv2 : mv2.mvData)  // all per-grade component of mv2
-            {
-                unsigned int grade_mv3 = itMv1.grade + (algebraDimension-itMv2.grade);
-                if(grade_mv3 <= algebraDimension) {
-                    // handle the scalar product as well as the left contraction
-                    auto itMv3 = mv3.createVectorXdIfDoesNotExist(grade_mv3);
-                    outerProductDualPrimal(itMv1.vec, itMv2.vec, itMv3->vec,
-                                           itMv1.grade, itMv2.grade, (unsigned)(algebraDimension-grade_mv3));
-
-                    // check if the result is non-zero
-                    if(!((itMv3->vec.array() != 0.0).any())){
-                        mv3.mvData.erase(itMv3);
-                        mv3.gradeBitmap &= ~(1<<grade_mv3);
-                    }
-                }
-            }
-
-
-        return mv3;
-
+        return this->dual() ^ mv2;
     }
 
     template<typename T>
     Mvec<T> Mvec<T>::outerDualDual(const Mvec<T> &mv2) const{
-        Mvec<T> mv3;
-
-        for(const auto & itMv1 : this->mvData)    // all per-grade component of mv1
-            for(const auto & itMv2 : mv2.mvData)  // all per-grade component of mv2
-            {
-                unsigned int grade_mv3 = itMv1.grade + (algebraDimension-itMv2.grade);
-                if(grade_mv3 <= algebraDimension) {
-                    // handle the scalar product as well as the left contraction
-                    auto itMv3 = mv3.createVectorXdIfDoesNotExist(grade_mv3);
-                    outerProductDualDual(itMv1.vec, itMv2.vec, itMv3->vec,
-                                           itMv1.grade, itMv2.grade, (unsigned)(algebraDimension-grade_mv3));
-
-                    // check if the result is non-zero
-                    if(!((itMv3->vec.array() != 0.0).any())){
-                        mv3.mvData.erase(itMv3);
-                        mv3.gradeBitmap &= ~(1<<grade_mv3);
-                    }
-                }
-            }
-
-
-        return mv3;
-
+        return this->dual() ^ mv2.dual();
     }
 
 project_singular_metric_comment_end
@@ -1354,9 +1309,14 @@ project_singular_metric_comment_begin
     }
 project_singular_metric_comment_end
 
-    // compute the dual of a multivector (i.e mv* = mv.reverse() * Iinv)
+    // compute the dual of a multivector (i.e. mv* = mv < I, the left contraction of mv onto the pseudo-scalar)
     template<typename T>
     Mvec<T> Mvec<T>::dual() const {
+        // general metric (neither diagonal nor a permutation of a diagonal matrix): the dual of a basis blade
+        // is a linear combination of basis blades, it is computed from its definition
+        if(!fastDualAvailable)
+            return (*this) < I<T>();
+
         Mvec<T> mvResult;
         // for each k-vectors of the multivector
         for(auto itMv=mvData.rbegin(); itMv!=mvData.rend(); ++itMv){
@@ -1550,7 +1510,6 @@ project_static_multivector_one_component
     //    void recursiveTraversalMultivector(std::ostream &stream, const Mvec<U> &mvec, unsigned int currentGrade, int currentIndex, std::vector<int> listBasisBlades, unsigned int lastIndex, unsigned int gradeMV, bool& moreThanOne);
 
 
-    void temporaryFunction1();
 
 }     /// End of Namespace
 

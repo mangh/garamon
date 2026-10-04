@@ -9,6 +9,8 @@
 
 #include "ProductTools.hpp"
 
+#include <bitset>
+
 
 // fills the [xor to pos/grade] and the [pos/grade to xor] arrays.
 ProductTools::ProductTools(const unsigned int vectorSpaceDimension)
@@ -55,7 +57,7 @@ ProductTools::~ProductTools() {}
 
 
 unsigned int ProductTools::hammingWeight(const unsigned int xorIndexMv) {
-    return __builtin_popcount(xorIndexMv);
+    return (unsigned int)std::bitset<32>(xorIndexMv).count();
 }
 
 
@@ -192,6 +194,10 @@ std::list<productComponent<double>> ProductTools::generateExplicitInnerProductLi
             if(innerProductExists(indexMv1, indexMv2)){
                 // compute the coefficient
                 currentProduct.coefficient = productCoefficientFromMetric(indexMv1, indexMv2,diagonalMetric);
+
+                // degenerate metric: the product may be null
+                if(currentProduct.coefficient == 0.0)
+                    continue;
                 // compute the resulting index
                 unsigned int indexOfResult = xorIndexToGradeAndPosition[productResultXorIndex(indexMv1, indexMv2)].second;
                 // fill the resulting (gradeMv2-gradeMv1)-vector which is expressed in the orthogonal basis
@@ -423,23 +429,12 @@ unsigned int ProductTools::getXorIndex(unsigned int grade, unsigned int homogene
 
 
 double getScaleInversePseudoScalar(const Eigen::MatrixXd &metric){
-    // compute the determinant of the metric
-    double sign = 1.0;
-    for(unsigned int i=0; i<(unsigned int)metric.rows(); ++i){
-        // start a table line by the vector name
-        if(metric(i,i)==0){
-            // A permutation needs to be computed
-            // look for the matching column
-            for(unsigned int j=i; j<(unsigned int)metric.cols(); ++j){
-                if(metric(i,j) != 0){
-                    sign *= -1;
-                }
-            }
-        }
-        else sign *= metric(i,i);
-    }
-
-    return sign;
+    // the pseudo scalar I = e1^e2^...^en satisfies reverse(I) I = det(metric), thus
+    // I^{-1} = reverse(I) / det(metric) = (-1)^{n(n-1)/2} I / det(metric).
+    // This function returns 1/det(metric), the caller handles the reverse sign.
+    // (0 for a degenerate metric, the pseudo scalar is then not invertible)
+    const double determinant = metric.determinant();
+    if(determinant == 0.0)
+        return 0.0;
+    return 1.0 / determinant;
 }
-
-

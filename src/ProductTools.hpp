@@ -22,11 +22,7 @@
 #include <Eigen/Dense> // use the metric which is dense
 #include <Eigen/Sparse> // use the transformation matrices which are sparse
 #include <iostream>
-#if defined(_MSC_BUILD)
-	#ifndef __builtin_popcount
-		#define __builtin_popcount __popcnt
-	#endif
-#endif // __WINDOWS MSVC compiler__
+#include <list>
 
 
 /// In the computation of mv3 = mv1^mv2, this represents a quadruplet containing the indices of mv1,mv2,mv3 and a coefficient in a product between two blades.
@@ -55,7 +51,7 @@ bool compareProductComponents(const C &a, const C &b)
     if(a.indexOfMv2 > b.indexOfMv2) return false;
     if(a.indexOfMv2 < b.indexOfMv2) return true;
 
-    return true;
+    return false; // equal components: a strict weak ordering requires false
 }
 
 
@@ -195,7 +191,7 @@ protected:
     std::vector<std::pair<unsigned int,unsigned int> > xorIndexToGradeAndPosition; // number of pairs is 2^dimension
 };
 
-/// \brief generate a scale containing the sign of the norm of the pseudo-inverse
+/// \brief return 1/det(metric) (0 for a degenerate metric): the inverse pseudo-scalar is (-1)^{n(n-1)/2} I / det(metric)
 double getScaleInversePseudoScalar(const Eigen::MatrixXd &metric);
 
 #endif //GARAGEN_PRODUCTTOOLS_HPP

@@ -84,16 +84,6 @@ std::string fastRightComplementUtilities(const unsigned int dimension, const Pro
                                          std::string &fastDualComponents);
 
 
-std::string primalWedgeDualUtilities(const unsigned int dimension, const ProductTools& product,
-                                     const Eigen::VectorXd &diagonalMetric,
-                                     double scaleInversePseudoScalar);
-
-std::string primalWedgeDualUtilitiesBasisChange(unsigned int dimension, const ProductTools& product,
-                                     const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& transformationMatrices,
-                                     const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& inverseTransformationMatrices,
-                                     const Eigen::VectorXd &diagonalMetric,
-                                     double scaleInversePseudoScalar);
-
 std::string basisTransformMatricesLoad();
 
 std::string multivectorComponentBuilder(const MetaData& metaData, const std::string &data);
@@ -111,6 +101,12 @@ std::string outerProductExplicitComments(const unsigned int gradeMv1, const unsi
 std::string outerProductExplicitPrototype(const unsigned int gradeMv1, const unsigned int gradeMv2);
 
 std::string productListToString(std::list<productComponent<double>> &listOfExplicitProducts);
+
+// round the coefficients of a list of products to "nice" values (see numericalCleanUpValue) and remove the null products
+void cleanUpProductList(std::list<productComponent<double>> &listOfProducts, const double epsilon);
+
+// true if the explicit geometric product function geometric_[gradeMv1]_[gradeMv2]_[gradeMv3] is generated (and referenced by the function pointers)
+bool geometricProductFunctionExists(const MetaData &metaData, const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3);
 
 std::string generateOuterRecursive(const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3);
 

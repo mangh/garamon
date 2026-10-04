@@ -17,7 +17,8 @@ Install
 ## Dependencies
     * 'Eigen 3.3.4'  or more [Eigen](http://eigen.tuxfamily.org)
     * 'CLI11 2.7.2'  or more [CLI11](https://github.com/CLIUtils/CLI11)
-    * 'CMake 3.10' or more
+    * 'CMake 3.24' or more
+    * 'Catch2 3' or more [Catch2](https://github.com/catchorg/Catch2) (only for the unit tests, downloaded if not found)
     * 'pybind11' (only for building the Python bindings of a generated library, install with 'pip install pybind11'; requires CMake 3.18 or more)
 
 ## Compiler tested
@@ -109,6 +110,24 @@ You might need to add the `-DCMAKE_PREFIX_PATH=/path/to/eigen3` parameter to poi
 (2) The module is installed into the site-packages of the Python interpreter found by CMake, which usually requires admin rights (`sudo`, or an elevated terminal on Windows).
 Either install to your per-user site-packages instead, by adding `-DPYTHON_INSTALL_DIR="$(python -m site --user-site)"` to the `cmake -S ...` command,
 or activate a virtual environment (`python -m venv .venv`) before the `cmake -S ...` command: CMake then uses it and installs the module there.
+
+
+Tests
+=====
+
+The unit tests use [Catch2](https://github.com/catchorg/Catch2) (v3) and CTest. They are built by default (CMake option `GARAMON_BUILD_TESTS`):
+
+```sh
+~/garamon$ cmake -S . -B build
+~/garamon$ cmake --build build
+~/garamon$ ctest --test-dir build --output-on-failure
+```
+
+* `generator_tests`: unit tests of the generator itself (configuration parser, metric analysis, product tables, code generation, ...)
+* `<algebra>_tests`: the algebras `c3ga`, `c5ga`, `e3ga` and `p3ga`, as well as two test algebras with a non-normalized and a non-orthogonal metric (`tests/conf/`), are generated at build time; each generated library is compared with an independent reference implementation of the geometric algebra (`tests/algebras/reference/CliffordReference.hpp`)
+* `<algebra>: sample`: the generated sample program is compiled and run.
+
+To run a part of the tests, e.g. the c3ga dual tests: `build/tests/c3ga_tests "[dual]"`, or `ctest --test-dir build -R c3ga`.
 
 
 Notes

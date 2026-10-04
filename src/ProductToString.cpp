@@ -49,7 +49,7 @@ std::string perGradeStartingIndexToString(const std::vector<int>& perGradeStarti
 // build the string of the 'vectorNumber' basis name, prefixed by 'e' or 'E' according to 'lowercase'.
 // example:  "E12", "e23", ...
 std::string vectorIdToString(const MetaData& metaData, const bool lowercase, const int vectorNumber){
-    return lowercase?"e"+metaData.basisVectorName[0]:"E"+metaData.basisVectorName[vectorNumber];
+    return (lowercase?"e":"E") + metaData.basisVectorName[vectorNumber];
 }
 
 
@@ -82,7 +82,7 @@ std::string metricToString(const MetaData &metaData){
             // if integer, remove the floating point notation
             if(metaData.metric(i,j) - (int)metaData.metric(i,j) == 0 )
                 metric += std::to_string((int)metaData.metric(i,j)) + "\t";
-            else metric += std::to_string(metaData.metric(i,j)) + "\t";
+            else metric += doubleToString(metaData.metric(i,j)) + "\t";
         }
 
         metric += "\\n\\\n"; // generates "\n\"
@@ -157,7 +157,7 @@ std::string perGradetransformMatricesToString(const std::vector<double>& transfo
 
     std::string outputString = "const std::string grade"+std::to_string(grade)+"MatrixComponents = \" ";
     for(unsigned int j=startingPosition;j<endPosition;++j){
-        outputString += std::to_string((int)transformComponents[3*j]) + " " + std::to_string((int)transformComponents[3*j+1]) + " " + std::to_string(transformComponents[3*j+2])+ " ";
+        outputString += std::to_string((int)transformComponents[3*j]) + " " + std::to_string((int)transformComponents[3*j+1]) + " " + doubleToString(transformComponents[3*j+2])+ " ";
     }
     outputString += "\""; // filling of the grade i components string is finished
     
@@ -467,7 +467,7 @@ std::string fastDualUtilitiesBasisChange(unsigned int dimension, const ProductTo
     }
 
     for(unsigned int i=0;i<dualCoefficientsComponents.size();++i){
-        fastDualComponents+= std::to_string(dualCoefficientsComponents[i])+" ";
+        fastDualComponents+= doubleToString(dualCoefficientsComponents[i])+" ";
     }
 
 
@@ -502,6 +502,10 @@ std::string fastRightComplementUtilities(const unsigned int dimension,
             // start a grade entry
             outputStringPermutations += "{{";
 
+            // the dual (Mvec::dual) first permutes the components, then multiplies them by the coefficients:
+            // the coefficients are thus indexed by the position of the right complement, not by the position of the blade
+            std::vector<double> gradeSigns(bin_coeff(dimension, grade), 0.0);
+
             // for all element of the considered grade
             for(unsigned int element=0; element<bin_coeff(dimension, grade); ++element){
 
@@ -514,17 +518,20 @@ std::string fastRightComplementUtilities(const unsigned int dimension,
                 // compute the sign change
                 double sign = ProductTools::outerProductSign(mvXorIndex,rightComplementXorIndex);
 
-                // add the sign to the sign array
-                dualCoefficientsComponents.push_back(sign);
-
                 // find its position in the homogeneous multivector representation
                 unsigned int rigthComponentPos = product.getHomogeneousIndex(rightComplementXorIndex);
+
+                // the sign of the right complement
+                gradeSigns[rigthComponentPos] = sign;
 
                 // add the permutation index in the output string
                 outputStringPermutations += std::to_string(rigthComponentPos);
                 if(element < bin_coeff(dimension, grade)-1)
                     outputStringPermutations += ",";
             }
+
+            // add the signs to the sign array
+            dualCoefficientsComponents.insert(dualCoefficientsComponents.end(), gradeSigns.begin(), gradeSigns.end());
 
             // close the grade entry
             outputStringPermutations += "}}, ";
@@ -536,7 +543,7 @@ std::string fastRightComplementUtilities(const unsigned int dimension,
 
     // copy the sign change array into a string (passed in argument)
     for(unsigned int i=0;i<dualCoefficientsComponents.size();++i){
-        fastDualComponents+= std::to_string(dualCoefficientsComponents[i])+" ";
+        fastDualComponents+= doubleToString(dualCoefficientsComponents[i])+" ";
     }
 
     // set the instruction to load the Eigen compatible sign change source code
@@ -627,88 +634,13 @@ std::string fastDualUtilities(unsigned int dimension, const ProductTools& produc
     //outputStringCoefficients += "}};";
     
     for(unsigned int i=0;i<dualCoefficientsComponents.size();++i){
-        fastDualComponents+= std::to_string(dualCoefficientsComponents[i])+" ";
+        fastDualComponents+= doubleToString(dualCoefficientsComponents[i])+" ";
     }
 
 
 
     return outputStringPermutations + outputStringCoefficients;
 }
-
-
-
-
-
-
-
-// defines the array of permutations and coefficients required in the computation of the fast dual
-std::string primalWedgeDualUtilities(const unsigned int dimension, const ProductTools& product,
-                                     const Eigen::VectorXd &diagonalMetric,
-                                     double scaleInversePseudoScalar){
-
-    std::string outputString = "";
-    outputString += "    template<typename T>\n"
-                    "    std::array<T, " + std::to_string(1<<dimension) + "> recursiveDualCoefficients = {{ ";
-
-    std::vector<double> tabDualCoefficients(1<<dimension);
-
-    // for each possible grade from 0 to dimension-1 do
-    for(unsigned int grade=0; grade<=dimension; ++grade){
-
-        std::list<productComponent<double>> listProductInnerProduct = product.generateExplicitInnerProductListEuclideanSpace(
-                grade,
-                dimension,
-                diagonalMetric);
-
-        for(auto & products : listProductInnerProduct) // for each list of permutation for the grade 'grade'
-            tabDualCoefficients[product.getXorIndex(grade,products.indexOfMv3)] = products.coefficient;
-    }
-
-    for(int i=0 ; i<(1<<dimension)-1; ++i){ // for each list of permutation for the grade 'grade'
-        outputString += std::to_string(tabDualCoefficients[i]);
-        outputString += ", ";// add the coefficient required to compute the dual
-    }
-    outputString += std::to_string(tabDualCoefficients[0]) +"}}; /*!< array containing the coefficients needed to compute the recursive product like (primal^dual) */\n    ";
-    return outputString;
-}
-
-
-// defines the array of permutations and coefficients required in the computation of the fast dual
-std::string primalWedgeDualUtilitiesBasisChange(unsigned int dimension, const ProductTools& product,
-                                                const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& transformationMatrices,
-                                                const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& inverseTransformationMatrices,
-                                                const Eigen::VectorXd &diagonalMetric,
-                                                double scaleInversePseudoScalar){
-    std::string outputString = "    template<typename T>\n"
-                               "    std::array<T, " + std::to_string(1<<dimension) + "> recursiveDualCoefficients = {{ ";
-
-    std::vector<double> tabDualCoefficients(1<<dimension);
-
-    // for each possible grade from 0 to dimension-1 do
-    for(unsigned int grade=0; grade<=dimension; ++grade){
-
-        std::list<productComponent<double>> listProductInnerProduct = product.generateExplicitInnerProductList(
-                grade,
-                dimension,
-                inverseTransformationMatrices[grade],
-                inverseTransformationMatrices[dimension],
-                transformationMatrices[dimension-grade],
-                diagonalMetric);
-
-        for(auto & products : listProductInnerProduct){ // for each list of permutation for the grade 'grade'
-            tabDualCoefficients[product.getXorIndex(grade,products.indexOfMv3)] = products.coefficient;
-        }
-    }
-
-    for(int i=0 ; i<(1<<dimension)-1; ++i){ // for each list of permutation for the grade 'grade'
-        outputString += std::to_string(tabDualCoefficients[i]);
-        outputString += ",";// add the coefficient required to compute the dual
-    }
-    outputString += std::to_string(tabDualCoefficients[0]) +"}}; /*!< array containing the coefficients needed to compute the recursive product like (primal^dual) */";
-
-    return outputString;
-}
-
 
 
 
@@ -794,9 +726,9 @@ std::string diagonalMetricToString(const MetaData& metaData){
 
     // add vector elements
     for(unsigned int i=0; i<(unsigned int)metaData.diagonalMetric.size()-1; ++i)
-        outputString += std::to_string(metaData.diagonalMetric(i)) + ",";
+        outputString += doubleToString(metaData.diagonalMetric(i)) + ",";
 
-    outputString += std::to_string(metaData.diagonalMetric(metaData.diagonalMetric.size()-1)) + "; return tmp;}();";
+    outputString += doubleToString(metaData.diagonalMetric(metaData.diagonalMetric.size()-1)) + "; return tmp;}();";
 
     // add doxygen comments
     outputString += "   /*!< defines the diagonal metric (stored as a vector) */";
@@ -892,7 +824,7 @@ std::string productListToString(std::list<productComponent<double>> &listOfExpli
             if(firstProduct){
                 // If the coefficient is neither -1 nor 1 then it has to appear in the generated component
                 if( ((*iteratorProduct).coefficient !=-1) && ((*iteratorProduct).coefficient !=1)){
-                    outputString += " "+std::to_string((*iteratorProduct).coefficient) + "*";
+                    outputString += " "+doubleToString((*iteratorProduct).coefficient) + "*";
                 }else{
                     outputString += ((*iteratorProduct).coefficient < 0) ? " -" : "  ";
                 }
@@ -900,7 +832,7 @@ std::string productListToString(std::list<productComponent<double>> &listOfExpli
             }else {
                 if (((*iteratorProduct).coefficient != -1) && ((*iteratorProduct).coefficient != 1)) {
                     outputString += ((*iteratorProduct).coefficient < 0) ? " " : " + ";
-                    outputString += std::to_string((*iteratorProduct).coefficient) + "*";
+                    outputString += doubleToString((*iteratorProduct).coefficient) + "*";
                 } else outputString += ((*iteratorProduct).coefficient < 0) ? " - " : " + ";
             }
             // write the product
@@ -1223,7 +1155,8 @@ std::string generateInnerExplicitBasisChange_cpp(const MetaData &metaData,
                             inverseTransformationMatrices[gradeMv2],
                             transformationMatrices[gradeMv3],
                             metaData.diagonalMetric);
-
+                    if(metaData.useNumericalCleanUp)
+                        cleanUpProductList(listOfProducts, metaData.epsilon);
 
                     // convert all the computed products as a string containing c++ instructions
                     outputString += productListToString(listOfProducts);
@@ -1307,6 +1240,30 @@ std::string generateGeometricRecursiveFloat64(const unsigned int gradeMv1, const
 
 
 //// return a string containing all the explicit per-grade inner product functions
+bool geometricProductFunctionExists(const MetaData &metaData, const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3){
+
+    // compute outer / inner / geometric grades
+    const unsigned int gradeOuter = gradeMv1 + gradeMv2;
+    const unsigned int gradeInner = (unsigned int) std::abs(int(gradeMv1)-int(gradeMv2));
+    const int gradeMax = 2*(int)metaData.dimension - (int)gradeOuter;
+
+    // ignore the outer and inner products
+    // the grade of the result has to be in [gradeMv1-gradeMv2, gradeMv1-gradeMv2+2, gradeMv1-gradeMv2+4,...]
+    return (gradeMv3 > gradeInner) && ((int)gradeMv3 <= gradeMax) && ((gradeMv3 - gradeInner)%2 == 0) && (gradeMv3 < gradeOuter)
+           && (bin_coeff(metaData.dimension,gradeMv1) <= metaData.maxDimPrecomputedProducts)
+           && (bin_coeff(metaData.dimension,gradeMv2) <= metaData.maxDimPrecomputedProducts);
+}
+
+
+void cleanUpProductList(std::list<productComponent<double>> &listOfProducts, const double epsilon){
+
+    // round the coefficients to "nice" values (the basis changes introduce small numerical errors) and remove the null products
+    for(auto &component : listOfProducts)
+        component.coefficient = numericalCleanUpValue(component.coefficient, epsilon);
+    listOfProducts.remove_if([](const productComponent<double> &component){ return component.coefficient == 0.0; });
+}
+
+
 std::string generateGeometricExplicit_cpp(const MetaData &metaData,
                                           const ProductTools& product){
 
@@ -1339,8 +1296,8 @@ std::string generateGeometricExplicit_cpp(const MetaData &metaData,
             // for each homogeneous multivectors whose grade is neither the (gradeMv1+gradeMv2) nor |gradeMv1-gradeMv2|
             for(unsigned int gradeMv3 = 0;gradeMv3<dimension;++gradeMv3){
 
-                // process only the required products
-                if(!(listOfProducts[gradeMv3].empty())){
+                // generate all the functions referenced by the function pointers, even without any product (empty function)
+                if(geometricProductFunctionExists(metaData, gradeMv1, gradeMv2, gradeMv3)){
 
                     // generate the comments of the current function
                     outputString += geometricProductExplicitComments(gradeMv1, gradeMv2,gradeMv3);
@@ -1386,6 +1343,9 @@ std::string generateGeometricExplicitBasisChange_cpp(const MetaData &metaData,
                                                                                                                            inverseTransformationMatrices[gradeMv2],
                                                                                                                            transformationMatrices,
                                                                                                                            metaData.diagonalMetric);
+            if(metaData.useNumericalCleanUp)
+                for(auto &list : listOfProducts)
+                    cleanUpProductList(list, metaData.epsilon);
 
             unsigned int dimension = transformationMatrices[1].cols();
 
@@ -1393,8 +1353,8 @@ std::string generateGeometricExplicitBasisChange_cpp(const MetaData &metaData,
             // for each homogeneous multivectors whose grade is neither the (gradeMv1+gradeMv2) nor |gradeMv1-gradeMv2|
             for(unsigned int gradeMv3 = 0;gradeMv3<dimension;++gradeMv3){
 
-                // process only the required products
-                if(!(listOfProducts[gradeMv3].empty())){
+                // generate all the functions referenced by the function pointers, even without any product (empty function)
+                if(geometricProductFunctionExists(metaData, gradeMv1, gradeMv2, gradeMv3)){
 
                     // generate the comments of the current function
                     outputString += geometricProductExplicitComments(gradeMv1, gradeMv2,gradeMv3);
@@ -1443,15 +1403,7 @@ std::string generateGeometricExplicitFunctionsPointer(const MetaData &metaData){
 
             for(unsigned int gradeMv2=0; gradeMv2<=metaData.dimension; ++gradeMv2) {
 
-                // compute outer / inner / geometric grades
-                unsigned int gradeOuter = gradeMv1 + gradeMv2;
-                unsigned int gradeInner = (unsigned int) std::abs(int(gradeMv1)-int(gradeMv2));
-                unsigned int gradeGeometric = (gradeMv3 - gradeInner)%2;
-                unsigned int gradeMax = (2*metaData.dimension)-gradeOuter;
-
-                // ignore the outer and inner products
-                // the grade of the result has to be in [gradeMv1-gradeMv2, gradeMv1-gradeMv2+2, gradeMv1-gradeMv2+4,...]
-                if((gradeMv3 > gradeInner) && (gradeMv3 <= gradeMax) && (gradeGeometric == 0) && (gradeMv3 < gradeOuter) && ( bin_coeff(metaData.dimension,gradeMv1) <= metaData.maxDimPrecomputedProducts) && (bin_coeff(metaData.dimension,gradeMv2) <= metaData.maxDimPrecomputedProducts) ){
+                if(geometricProductFunctionExists(metaData, gradeMv1, gradeMv2, gradeMv3)){
                     // create the entry for the triple of (gradeMv3,gradeMv1,gradeMv2)
                     outputString += "geometric_" + std::to_string(gradeMv1) + "_" + std::to_string(gradeMv2)+ "_" + std::to_string(gradeMv3) + "<T>";
                 }else{

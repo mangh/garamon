@@ -37,6 +37,9 @@ double minAbsNonZeroValue(Eigen::VectorXd x);
 
 Eigen::MatrixXd eigenRefinement(Eigen::MatrixXd &P, Eigen::MatrixXd &D, Eigen::MatrixXd &Pinv);
 
+// when pertinent, replace a value by a "nice" nearby value (0, an integer, a multiple of 2^-7 or a decimal number), else return the value itself
+double numericalCleanUpValue(const double value, const double epsilon);
+
 Eigen::MatrixXd numericalCleanUp(const Eigen::MatrixXd &M, const double epsilon);
 
 Eigen::VectorXd vectorNumericalCleanUp(const Eigen::VectorXd& original, const double epsilon);
@@ -52,7 +55,7 @@ Eigen::SparseMatrix<double, Eigen::ColMajor> computePerGradeTransformationMatrix
 
 Eigen::SparseMatrix<double, Eigen::ColMajor>  computeInverseTransformationMatrix(const Eigen::SparseMatrix<double, Eigen::ColMajor>& transformationMatrix, const double epsilon);
 
-std::pair<std::vector<double>,std::vector<double>> computeTransformationMatricesToVector(const Eigen::MatrixXd &P, const double epsilon,std::vector<unsigned int>& transformationMatricesSizes,
+std::pair<std::vector<double>,std::vector<double>> computeTransformationMatricesToVector(const Eigen::MatrixXd &P, const double epsilon, std::vector<unsigned int>& transformationMatricesSizes, std::vector<unsigned int>& inverseTransformationMatricesSizes,
                                                                                        std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& allTransformationMatrices,
                                                                                        std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& allInverseTransformationMatrices);
 

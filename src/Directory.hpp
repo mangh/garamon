@@ -30,7 +30,11 @@ std::string readFile(const std::string& fileName);
 
 bool writeFile(const std::string& data, const std::string& fileName);
 
+// replace all the occurrences of the literal string 'pattern' in 'data' by the literal string 'replaceBy'
 void substitute(std::string &data, const std::string &pattern, const std::string &replaceBy);
+
+// concatenate a directory and a file/directory name, adding a '/' separator if needed (i.e. "dir" + "file" => "dir/file", "dir/" + "file" => "dir/file")
+std::string joinPath(const std::string &directory, const std::string &name);
 
 bool copyBin(const std::string &src, const std::string &dest);
 

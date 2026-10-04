@@ -16,7 +16,8 @@
 #include <sstream>
 #include <sys/types.h> // required for stat.h
 #include <sys/stat.h>
-#include <regex>       // for substitute
+
+#include <stdexcept>
 
 
 #if defined(_WIN32) && (defined(__MINGW32__) || defined(_MSC_BUILD))
@@ -32,14 +33,13 @@ void makeDirectory(const std::string &dirName) {
 #if defined(_WIN32)
 	nError = _mkdir(dirName.c_str()); // can be used on Windows
 #else
-    mode_t nMode = 0733; // UNIX style permissions
+    mode_t nMode = 0755; // UNIX style permissions (rwxr-xr-x, the umask still applies)
     nError = mkdir(dirName.c_str(), nMode); // can be used on non-Windows
 #endif
 
     // handle your error here
     if (nError != 0) {
-        std::cerr << "error: can not create directory: " << dirName << std::endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("can not create directory: " + dirName);
     }
 }
 
@@ -82,8 +82,7 @@ std::string readFile(const std::string &fileName) {
 
     // check if the file is opened
     if(!myfile.is_open()){
-        std::cerr << "error: can not open file: " << fileName << std::endl;
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("can not open file: " + fileName);
     }
 
     // copy the data to a string
@@ -116,7 +115,34 @@ bool writeFile(const std::string &data, const std::string &fileName) {
 
 void substitute(std::string &data, const std::string &pattern, const std::string &replaceBy) {
 
-    data = std::regex_replace(data, std::regex(pattern), replaceBy);
+    // literal replacement of all the occurrences of 'pattern' (neither 'pattern' nor 'replaceBy' are interpreted)
+    if(pattern.empty())
+        return;
+
+    std::string result;
+    result.reserve(data.size());
+    std::size_t start = 0;
+    std::size_t pos;
+    while((pos = data.find(pattern, start)) != std::string::npos) {
+        result.append(data, start, pos - start);
+        result += replaceBy;
+        start = pos + pattern.size();
+    }
+    result.append(data, start, std::string::npos);
+    data.swap(result);
+}
+
+
+std::string joinPath(const std::string &directory, const std::string &name) {
+
+    if(directory.empty())
+        return name;
+
+    const char last = directory.back();
+    if(last == '/' || last == '\\')
+        return directory + name;
+
+    return directory + "/" + name;
 }
 
 

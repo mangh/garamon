@@ -9,6 +9,11 @@
 
 #include "Utilities.hpp"
 
+#include <bitset>
+#include <iomanip>
+#include <limits>
+#include <sstream>
+
 
 // compute the factorial
 unsigned int factorial(unsigned int n) {
@@ -20,7 +25,8 @@ unsigned int factorial(unsigned int n) {
 unsigned int bin_coeff(unsigned int n, unsigned int k) {
     if(k>n) return 0;
 
-    unsigned int res = 1;
+    // 64 bits intermediate results: res * (n-i) overflows 32 bits from C(31,15) on
+    unsigned long long res = 1;
     // Because C(n, k) = C(n, n-k)
     if (k > n - k)
         k = n - k;
@@ -29,7 +35,7 @@ unsigned int bin_coeff(unsigned int n, unsigned int k) {
         res *= (n - i);
         res /= (i + 1);
     }
-    return res;
+    return (unsigned int)res;
 }
 
 
@@ -39,14 +45,14 @@ void computePerGradeStartingIndex(const unsigned int &dimension, std::vector<int
 
     currentIndex += bin_coeff(dimension, currentGrade);
     perGradeStartingIndex.push_back(currentIndex);
-    if(currentGrade < (dimension-1)){
+    if(currentGrade + 1 < dimension){ // (not 'currentGrade < dimension-1': unsigned underflow for dimension 0)
         computePerGradeStartingIndex(dimension,perGradeStartingIndex,currentIndex, currentGrade+1);
     }
 }
 
 
 unsigned int hammingWeight(unsigned int word){
-    return __builtin_popcount(word);
+    return (unsigned int)std::bitset<32>(word).count();
 }
 
 
@@ -132,4 +138,11 @@ std::vector<std::vector<unsigned int> > generateCombinations(const unsigned int 
     } while(std::prev_permutation(v.begin(), v.end())); // compute next permutation of the true values of v
 
     return sequence;
+}
+
+
+std::string doubleToString(const double value){
+    std::ostringstream stream;
+    stream << std::setprecision(std::numeric_limits<double>::max_digits10) << value;
+    return stream.str();
 }
