@@ -7,14 +7,9 @@
 # - <algebra>_sample: the sample program generated with the algebra is compiled and run
 
 # Catch.cmake (catch_discover_tests): shipped next to Catch2Config.cmake, or in 'extras' of the source tree
-if(DEFINED catch2_project_SOURCE_DIR)
-  list(APPEND CMAKE_MODULE_PATH "${catch2_project_SOURCE_DIR}/extras")
-endif()
-if(DEFINED catch2_project_DIR)
-  list(APPEND CMAKE_MODULE_PATH "${catch2_project_DIR}")
-endif()
-if(DEFINED Catch2_DIR)
-  list(APPEND CMAKE_MODULE_PATH "${Catch2_DIR}")
+
+if(DEFINED CATCH2_MODULE_PATH)
+  list(APPEND CMAKE_MODULE_PATH "${CATCH2_MODULE_PATH}")
 endif()
 include(Catch)
 

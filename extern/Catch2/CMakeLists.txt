@@ -1,26 +1,49 @@
 # Try to find the Catch2 package. If it’s not there,
 # try downloading it and building it from source.
+# This module exports:
+# 
+# - targets: Catch2::Catch2WithMain and Catch2::Catch2,
+#   which you can refer to using the `target_link_libraries` command,
+# 
+# - the CATCH2_MODULE_PATH variable (set in the parent scope) for use in
+#   the `tests` script, which needs the modules provided by Catch2.
 
-set(_catch2_brief "Catch2 (unit testing framework for C++)")
-set(_catch2_commit_hash "317ac1ed4c0bb6e6b91eafc817e05c488feffcb3")
-set(_catch2_release_tag "v3.16.0")  # August 2026
+set(_catch2_precis "Catch2 (unit testing framework for C++)")
 
 include(FetchContent)
 
 FetchContent_Declare(
   catch2_project
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG        ${_catch2_commit_hash}
+  GIT_TAG        317ac1ed4c0bb6e6b91eafc817e05c488feffcb3   # v3.16.0, August 2026 
   GIT_SHALLOW    TRUE
-  FIND_PACKAGE_ARGS NAMES Catch2 CONFIG GLOBAL
+  FIND_PACKAGE_ARGS 3.16 NAMES Catch2 CONFIG GLOBAL
 )
 
 FetchContent_MakeAvailable(catch2_project)
 
 if (catch2_project_FOUND)
-  message(STATUS "${_catch2_brief}, version ${catch2_project_VERSION} found")
+
+  set(CATCH2_MODULE_PATH "${catch2_project_DIR}" PARENT_SCOPE)
+  message(STATUS "${_catch2_precis}, version ${catch2_project_VERSION} found")
+
 elseif(catch2_project_POPULATED)
-  message(STATUS "${_catch2_brief}, version ${_catch2_release_tag} populated.")
+
+  set(CATCH2_MODULE_PATH "${catch2_project_SOURCE_DIR}/extras" PARENT_SCOPE)
+
+  # file(READ "${catch2_project_SOURCE_DIR}/src/catch2/catch_version_macros.hpp" _hdr)
+  # string(REGEX MATCH "CATCH_VERSION_MAJOR ([0-9]+)" _ "${_hdr}")
+  # set(_major "${CMAKE_MATCH_1}")
+  # string(REGEX MATCH "CATCH_VERSION_MINOR ([0-9]+)" _ "${_hdr}")
+  # set(_minor "${CMAKE_MATCH_1}")
+  # string(REGEX MATCH "CATCH_VERSION_PATCH ([0-9]+)" _ "${_hdr}")
+  # set(_patch "${CMAKE_MATCH_1}")
+  # set(CATCH2_VERSION "${_major}.${_minor}.${_patch}")
+  # message(STATUS "${_catch2_precis}, version ${CATCH2_VERSION} populated.")
+  message(STATUS "${_catch2_precis}, version v3.16.0 populated.")
+
 else()
-  message(FATAL_ERROR "${_catch2_brief} not found")
+
+  message(FATAL_ERROR "${_catch2_precis} not found")
+
 endif()
