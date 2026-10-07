@@ -39,8 +39,8 @@ Eigen::MatrixXd nonOrthogonalMetric() {
 
 double maxAbs(const Eigen::MatrixXd &m) { return m.cwiseAbs().maxCoeff(); }
 
-// determinant of the sub-matrix of 'm' made of the given rows and columns
-double minor(const Eigen::MatrixXd &m, const std::vector<unsigned int> &rows, const std::vector<unsigned int> &cols) {
+// determinant (minor) of the sub-matrix of 'm' made of the given rows and columns
+double subdeterminant(const Eigen::MatrixXd &m, const std::vector<unsigned int> &rows, const std::vector<unsigned int> &cols) {
     Eigen::MatrixXd sub(rows.size(), cols.size());
     for(std::size_t i = 0; i < rows.size(); ++i)
         for(std::size_t j = 0; j < cols.size(); ++j)
@@ -144,7 +144,7 @@ TEST_CASE("per grade transformation matrices are the compound matrices", "[metri
         CHECK(maxAbs(Eigen::MatrixXd(T) - Eigen::MatrixXd::Identity(bin_coeff(4, grade), bin_coeff(4, grade))) < 1.0e-12);
     }
 
-    // any matrix: the element (l,m) of the grade k matrix is the minor (rows of the l-th combination, columns of the m-th combination)
+    // any matrix: the element (l,m) of the grade k matrix is the minor (subdeterminant: rows of the l-th combination, columns of the m-th combination)
     Eigen::MatrixXd P(4, 4);
     P << 1, 2, 0, -1,
          0, 1, 3, 0,
@@ -157,7 +157,7 @@ TEST_CASE("per grade transformation matrices are the compound matrices", "[metri
         REQUIRE(T.rows() == (Eigen::Index)combinations.size());
         for(std::size_t l = 0; l < combinations.size(); ++l)
             for(std::size_t m = 0; m < combinations.size(); ++m)
-                CHECK(T.coeff(l, m) == Catch::Approx(minor(P, combinations[l], combinations[m])).margin(1.0e-12));
+                CHECK(T.coeff(l, m) == Catch::Approx(subdeterminant(P, combinations[l], combinations[m])).margin(1.0e-12));
 
         // no stored zero
         for(int k = 0; k < T.outerSize(); ++k)
