@@ -9,11 +9,11 @@
 
 
 #include "MetricTools.hpp"
+#include "Utilities.hpp"
 
 
 #include <Eigen/Eigenvalues>
 #include <cmath>
-#include <iostream>
 
 
 bool isMatrixDiagonal(const Eigen::MatrixXd &A, const double epsilon){
@@ -72,7 +72,7 @@ bool isMatrixPermutationOfDiagonal(const Eigen::MatrixXd &metric, const double e
 }
 
 
-unsigned int getRank(const Eigen::MatrixXd &metric){
+Eigen::Index getRank(const Eigen::MatrixXd &metric){
 
     Eigen::FullPivLU<Eigen::MatrixXd> lu(metric);
     return lu.rank();

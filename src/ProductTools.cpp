@@ -10,11 +10,13 @@
 #include "ProductTools.hpp"
 
 #include <bitset>
+#include <map>
+#include <iostream>
 
 
 // fills the [xor to pos/grade] and the [pos/grade to xor] arrays.
 ProductTools::ProductTools(const unsigned int vectorSpaceDimension)
-        : dimension(vectorSpaceDimension), xorIndexToGradeAndPosition(1<<vectorSpaceDimension)
+        : dimension(vectorSpaceDimension), xorIndexToGradeAndPosition(std::size_t(1) << vectorSpaceDimension)
 {
     // fill simultaneously both 'gradePositionToXorIndex' and 'xorIndexToGradeAndPosition'
     for(unsigned int grade=0; grade<=dimension; ++grade) {
@@ -132,8 +134,8 @@ double ProductTools::productCoefficientFromMetric(const unsigned int xorIndexMv1
     unsigned int commonOnes = xorIndexMv1 & xorIndexMv2;
 
     // loop over all the common 1s bit of xorIndexMv1 and xorIndexMv2
-    unsigned int dimension = diagonalMetric.size();
-    for(unsigned int i=0;i<dimension; ++i){
+    Eigen::Index dimension = diagonalMetric.size();
+    for(Eigen::Index i=0;i<dimension; ++i){
         if((commonOnes & (1<<i)) != 0){
             // one at position i in the binary representation of commonOnes
             coefficient *= diagonalMetric[i];

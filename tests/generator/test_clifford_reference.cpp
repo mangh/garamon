@@ -90,11 +90,11 @@ TEST_CASE("reference: algebraic identities", "[reference]") {
             // vectors: v v = B(v,v)
             Mv v = ref.zero();
             for(unsigned int i = 0; i < ref.dimension(); ++i)
-                v[1u << i] = a[1u << i];
+                v[std::size_t(1) << i] = a[std::size_t(1) << i];
             double expected = 0.0;
             for(unsigned int i = 0; i < ref.dimension(); ++i)
                 for(unsigned int j = 0; j < ref.dimension(); ++j)
-                    expected += v[1u << i] * v[1u << j] * metric[i][j];
+                    expected += v[std::size_t(1) << i] * v[std::size_t(1) << j] * metric[i][j];
             CHECK(CliffordReference::maxAbsDiff(ref.geometric(v, v), ref.scalar(expected)) < 1.0e-9);
 
             // the outer product does not depend on the metric

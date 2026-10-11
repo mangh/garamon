@@ -1,7 +1,6 @@
 // Garamon unit tests: src/ProductToString.cpp
 
 #include <list>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -104,8 +103,8 @@ TEST_CASE("right complement coefficients", "[product_to_string]") {
         REQUIRE(start != std::string::npos);
         const std::vector<double> permutations = numbersIn(code.substr(start + 19, code.find(";", start) - start - 19));
         const std::vector<double> coefficients = numbersIn(components);
-        REQUIRE(permutations.size() == (1u << dimension));
-        REQUIRE(coefficients.size() == (1u << dimension));
+        REQUIRE(permutations.size() == (std::size_t(1) << dimension));
+        REQUIRE(coefficients.size() == (std::size_t(1) << dimension));
 
         const garamon_test::CliffordReference reference(std::vector<std::vector<double>>(dimension, std::vector<double>(dimension, 0.0)));
         unsigned int offset = 0;

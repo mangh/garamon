@@ -21,7 +21,6 @@
 #include <Eigen/Sparse>
 #include <Eigen/LU> // for inverting
 
-#include "Utilities.hpp"
 
 bool isMatrixDiagonal(const Eigen::MatrixXd &metric, const double epsilon);
 
@@ -29,7 +28,7 @@ bool isMatrixIdentity(const Eigen::MatrixXd &metric, const double epsilon);
 
 bool isMatrixPermutationOfDiagonal(const Eigen::MatrixXd &metric, const double epsilon);
 
-unsigned int getRank(const Eigen::MatrixXd &metric);
+Eigen::Index getRank(const Eigen::MatrixXd &metric);
 
 void eigenDecomposition(const Eigen::MatrixXd &M, Eigen::MatrixXd &P, Eigen::MatrixXd &A);
 

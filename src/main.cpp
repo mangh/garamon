@@ -28,7 +28,7 @@ int main(int argc, char** argv){
 
     app.get_formatter()->column_width(35);
     app.get_formatter()->enable_option_type_names(false);
-    app.get_formatter()->long_option_alignment_ratio(1.0/5.0);
+    app.get_formatter()->long_option_alignment_ratio( 0.2f /* 1/5*/);
 
     std::string configurationFilesDirectory;
     app.add_option("-c,--config", configurationFilesDirectory, "Configuration file, e.g. \"garamond/conf/c3ga.conf\"")

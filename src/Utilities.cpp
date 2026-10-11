@@ -91,7 +91,7 @@ void getSignAndBladeOuterProduct(unsigned int& mvC, const unsigned int mvA, cons
 
 std::vector<unsigned int> getSetOfCombinationsFromXorIndexation(const int dim, const std::vector<std::vector<unsigned int> >& combinations){
 
-    std::vector<unsigned int> setOfCombinationsFromXorIndex((unsigned int)1 << dim);
+    std::vector<unsigned int> setOfCombinationsFromXorIndex(std::size_t(1) << dim);
 
     // for each possible sequence
     for(unsigned int i=0; i<combinations.size(); ++i){

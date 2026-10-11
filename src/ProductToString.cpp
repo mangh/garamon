@@ -412,7 +412,7 @@ std::string fastDualUtilitiesBasisChange(unsigned int dimension, const ProductTo
         
         if(listProductInnerProduct.empty()){ // empty set of coefficients, most likely a numerical cleanup problem with
             // fill the whole grade-vector with zero values after issue #9
-            for(int i=0;i<bin_coeff(dimension, grade)-1;++i)
+            for(unsigned int i=0;i<bin_coeff(dimension, grade)-1;++i)
                 outputStringPermutations +="0,";
             outputStringPermutations +="0";
             if(grade==0) outputStringPermutations += "}, ";
@@ -815,10 +815,15 @@ std::string productListToString(std::list<productComponent<double>> &listOfExpli
 
         // compute how many product from mv1 and mv2 contribute to this current component of mv3
         productComponent<double> currentComponent = *iteratorProduct;
-        unsigned long numberOfOccurrences = std::count_if(iteratorProduct, listOfExplicitProducts.end(),[currentComponent](productComponent<double> product){return product.indexOfMv3 == currentComponent.indexOfMv3;});
+        const std::size_t numberOfOccurrences = std::count_if(
+            iteratorProduct,
+            listOfExplicitProducts.end(),
+            [currentComponent](const productComponent<double>& product) {
+                return product.indexOfMv3 == currentComponent.indexOfMv3;
+            });
 
         // add all the products that contribute to this current component of mv3
-        for(unsigned long i=0; i<numberOfOccurrences ; ++i){
+        for (std::size_t i = 0; i < numberOfOccurrences; ++i) {
             // put the coefficient
             // if the coefficient is either 1 or -1 then it can be associated to a sign
             if(firstProduct){
@@ -1347,7 +1352,7 @@ std::string generateGeometricExplicitBasisChange_cpp(const MetaData &metaData,
                 for(auto &list : listOfProducts)
                     cleanUpProductList(list, metaData.epsilon);
 
-            unsigned int dimension = transformationMatrices[1].cols();
+            auto dimension = transformationMatrices[1].cols();
 
             // the resulting grades are (possibly) not unique.
             // for each homogeneous multivectors whose grade is neither the (gradeMv1+gradeMv2) nor |gradeMv1-gradeMv2|

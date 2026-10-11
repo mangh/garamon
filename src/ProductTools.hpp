@@ -16,12 +16,9 @@
 #define GARAGEN_PRODUCTTOOLS_HPP
 
 #include <vector>
-#include <array>
-#include <map>
 #include <utility>     // pairs
 #include <Eigen/Dense> // use the metric which is dense
 #include <Eigen/Sparse> // use the transformation matrices which are sparse
-#include <iostream>
 #include <list>
 
 
