@@ -15,7 +15,7 @@ include(FetchContent)
 FetchContent_Declare(
   catch2_project
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG        317ac1ed4c0bb6e6b91eafc817e05c488feffcb3   # v3.16.0, August 2026 
+  GIT_TAG        08092139210881f01a34e60c5f2fd6afa0ea4024   # v3.16.1, October 2026
   GIT_SHALLOW    TRUE
   FIND_PACKAGE_ARGS 3.16 NAMES Catch2 CONFIG GLOBAL
 )
@@ -40,7 +40,7 @@ elseif(catch2_project_POPULATED)
   # set(_patch "${CMAKE_MATCH_1}")
   # set(CATCH2_VERSION "${_major}.${_minor}.${_patch}")
   # message(STATUS "${_catch2_precis}, version ${CATCH2_VERSION} populated.")
-  message(STATUS "${_catch2_precis}, version v3.16.0 populated.")
+  message(STATUS "${_catch2_precis}, version v3.16.1 populated.")
 
 else()
 
