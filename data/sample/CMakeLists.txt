@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(cmake_project_name_sample)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # set the module path for "findLib.cmake"
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/")
 
@@ -44,7 +48,7 @@ endif()
 add_executable(cmake_project_name_sample src/main.cpp)
 
 # compilation flags
-target_compile_features(cmake_project_name_sample PRIVATE cxx_std_14) 
+# target_compile_features(cmake_project_name_sample PRIVATE cxx_std_14) 
 target_compile_options(cmake_project_name_sample PRIVATE -Wall -O2) 
 
 # includes

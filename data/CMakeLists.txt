@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 project(cmake_project_name_original_case CXX)
 set(CMAKE_BUILD_TYPE Release)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # include eigen
 find_package(Eigen3 REQUIRED)
 
@@ -34,9 +38,6 @@ message(STATUS "  headers")
 foreach(src_file ${header_files})
     message("          " ${src_file})
 endforeach()
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 # generate a library
@@ -75,7 +76,7 @@ if (BUILD_PYTHON)
         src/cmake_project_name_original_case/Mvec.cpp
     )
     target_include_directories(cmake_project_name_original_case_py PRIVATE src)
-    target_compile_features(cmake_project_name_original_case_py PRIVATE cxx_std_14)
+    # target_compile_features(cmake_project_name_original_case_py PRIVATE cxx_std_14)
     if(TARGET Eigen3::Eigen)
         target_link_libraries(cmake_project_name_original_case_py PRIVATE Eigen3::Eigen)
     else()
@@ -99,10 +100,10 @@ endif()
 
 # compilation flags
 if (MSVC)   
-    target_compile_features(cmake_project_name_original_case PRIVATE cxx_std_14) 
+    # target_compile_features(cmake_project_name_original_case PRIVATE cxx_std_14) 
     target_compile_options(cmake_project_name_original_case PRIVATE -Wall -O2) 
 else()
-    target_compile_features(cmake_project_name_original_case PRIVATE cxx_std_14) 
+    # target_compile_features(cmake_project_name_original_case PRIVATE cxx_std_14) 
     target_compile_options(cmake_project_name_original_case PRIVATE -Wall -O2 -Wno-return-local-addr)
 endif()
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g")

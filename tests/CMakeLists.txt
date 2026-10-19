@@ -33,7 +33,7 @@ add_executable(generator_tests
 )
 target_link_libraries(generator_tests PRIVATE garamon_core Catch2::Catch2WithMain)
 target_include_directories(generator_tests PRIVATE generator algebras/reference)
-target_compile_features(generator_tests PRIVATE cxx_std_17) # std::filesystem
+# target_compile_features(generator_tests PRIVATE cxx_std_17) # std::filesystem
 target_compile_definitions(generator_tests PRIVATE
   GARAMON_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
   GARAMON_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/generator_output"
@@ -67,7 +67,7 @@ function(garamon_add_algebra_tests name conf)
   )
   add_custom_target(generate_${name} DEPENDS "${stamp}")
 
-  # tests of the generated library (C++14: the standard required by the generated libraries)
+  # tests of the generated library (C++ standard as set in the top CMake script)
   file(GLOB test_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/algebras/${name}_*.cpp")
   # (add_dependencies only orders the targets: without OBJECT_DEPENDS, the objects are not rebuilt in the build that regenerates the library)
   set_source_files_properties(${test_sources} PROPERTIES OBJECT_DEPENDS "${stamp}")
@@ -75,7 +75,7 @@ function(garamon_add_algebra_tests name conf)
   add_dependencies(${name}_tests generate_${name})
   target_include_directories(${name}_tests PRIVATE "${library_dir}/src" algebras/common algebras/reference)
   target_link_libraries(${name}_tests PRIVATE Eigen3::Eigen Catch2::Catch2WithMain)
-  target_compile_features(${name}_tests PRIVATE cxx_std_14)
+  # target_compile_features(${name}_tests PRIVATE cxx_std_14)
   if(MSVC)
     target_compile_options(${name}_tests PRIVATE /bigobj)
   endif()
@@ -89,7 +89,7 @@ function(garamon_add_algebra_tests name conf)
   add_dependencies(${name}_sample generate_${name})
   target_include_directories(${name}_sample PRIVATE "${library_dir}/src")
   target_link_libraries(${name}_sample PRIVATE Eigen3::Eigen)
-  target_compile_features(${name}_sample PRIVATE cxx_std_14)
+  # target_compile_features(${name}_sample PRIVATE cxx_std_14)
   add_test(NAME "${name}: sample" COMMAND ${name}_sample)
 endfunction()
 

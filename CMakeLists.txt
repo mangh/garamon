@@ -3,11 +3,21 @@ cmake_minimum_required(VERSION 3.24)
 
 project(garamon_generator)
 
+set(CMAKE_CXX_STANDARD 20)
+message(DEBUG "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}")
+
+# CMAKE_CXX_STANDARD is not a reuirement, but a preference.
+# It may "decay" to a previous standard if the requested is not available.
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+message(DEBUG "CMAKE_CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}")
+
 # To avoid portability issues, language extensions (enabled by default)
 # are disabled before any target is created. This allows to stick to the
-# language standard such as "-std=c++14" instead of "-std=gnu++14" (which
-# is c++14 with GNU extensions):
+# language standard such as "-std=c++20" instead of "-std=gnu++20" (which
+# is c++20 with GNU extensions):
 set(CMAKE_CXX_EXTENSIONS OFF)
+message(DEBUG "CMAKE_CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS}")
+
 
 option(GARAMON_BUILD_TESTS "Build the unit tests of the generator and of some generated algebras (requires Catch2)" ON)
 
@@ -32,7 +42,7 @@ endforeach()
 add_library(garamon_core STATIC ${source_files})
 target_include_directories(garamon_core PUBLIC src)
 target_link_libraries(garamon_core PUBLIC Eigen3::Eigen)
-target_compile_features(garamon_core PUBLIC cxx_std_14)
+# target_compile_features(garamon_core PUBLIC cxx_std_14)
 target_compile_options(garamon_core PRIVATE $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W3,-Wall>)
 
 # the command line generator
@@ -45,7 +55,7 @@ target_link_libraries(garamon_generator PRIVATE
 )
 
 # compilation flags
-target_compile_features(garamon_generator PRIVATE cxx_std_14)
+# target_compile_features(garamon_generator PRIVATE cxx_std_14)
 target_compile_options(garamon_generator PRIVATE $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W3,-Wall>)
 
 # unit tests: 'ctest' from the build directory
