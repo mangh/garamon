@@ -71,9 +71,9 @@ GARAMON: Geometric Algebra Recursive and Adaptative MONster Generator
 
 OPTIONS:
   -h,  --help                      Print this help message and exit
-  -c,  --config REQUIRED           Configuration file, e.g. "garamond/conf/c3ga.conf"
-  -t,  --template REQUIRED         Template directory, e.g. "garamond/data/"
-  -o,  --output REQUIRED           Output directory, e.g. "garamond/build/output/"
+  -c,  --config REQUIRED           Configuration file, e.g. "garamon/conf/c3ga.conf"
+  -t,  --template REQUIRED         Template directory, e.g. "garamon/data/"
+  -o,  --output REQUIRED           Output directory, e.g. "garamon/build/output/"
 
 ~/garamon/build$
 ```

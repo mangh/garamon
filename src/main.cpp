@@ -31,17 +31,17 @@ int main(int argc, char** argv){
     app.get_formatter()->long_option_alignment_ratio( 0.2f /* 1/5*/);
 
     std::string configurationFilesDirectory;
-    app.add_option("-c,--config", configurationFilesDirectory, "Configuration file, e.g. \"garamond/conf/c3ga.conf\"")
+    app.add_option("-c,--config", configurationFilesDirectory, "Configuration file, e.g. \"garamon/conf/c3ga.conf\"")
         ->check(CLI::ExistingFile)
         ->required();
 
     std::string templateDataDirectory;
-    app.add_option("-t,--template", templateDataDirectory, "Template directory, e.g. \"garamond/data/\"")
+    app.add_option("-t,--template", templateDataDirectory, "Template directory, e.g. \"garamon/data/\"")
         ->check(CLI::ExistingDirectory)
         ->required();
 
     std::string outputDirectory;
-    app.add_option("-o,--output", outputDirectory, "Output directory, e.g. \"garamond/build/output/\"")
+    app.add_option("-o,--output", outputDirectory, "Output directory, e.g. \"garamon/build/output/\"")
         ->check(CLI::ExistingDirectory)
         ->required();
 
