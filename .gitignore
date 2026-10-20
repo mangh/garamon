@@ -35,3 +35,6 @@ build/*
 Debug/*
 Release/*
 out/*
+
+# clangd index
+.cache/
