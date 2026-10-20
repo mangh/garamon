@@ -6,16 +6,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Utilities.hpp"
-#include "CliffordReference.hpp"
-
-using garamon_test::CliffordReference;
-
-TEST_CASE("factorial", "[utilities]") {
-    CHECK(factorial(0) == 1u);
-    CHECK(factorial(1) == 1u);
-    CHECK(factorial(5) == 120u);
-    CHECK(factorial(12) == 479001600u);
-}
 
 TEST_CASE("binomial coefficients", "[utilities]") {
     CHECK(bin_coeff(5, 0) == 1u);
@@ -53,37 +43,6 @@ TEST_CASE("per grade starting index", "[utilities]") {
     std::vector<int> e0ga = {0}; // must terminate
     computePerGradeStartingIndex(0, e0ga, 0, 0);
     CHECK(e0ga == std::vector<int>{0, 1});
-}
-
-TEST_CASE("hamming weight and outer product sign", "[utilities]") {
-    CHECK(hammingWeight(0) == 0u);
-    CHECK(hammingWeight(0b1011) == 3u);
-    CHECK(hammingWeight(0xFFFFFFFFu) == 32u);
-
-    for(unsigned int a = 0; a < 64; ++a)
-        for(unsigned int b = 0; b < 64; ++b) {
-            if(a & b)
-                continue;
-            INFO("blades " << a << " ^ " << b);
-            CHECK(computeSign(a, b) == (int)CliffordReference::outerSign(a, b));
-
-            int sign = 0;
-            CHECK(outerProductBinaryComponents(a, b, sign) == (a ^ b));
-            CHECK(sign == computeSign(a, b));
-
-            unsigned int mvC = 0;
-            double coefficient = 1.0;
-            getSignAndBladeOuterProduct(mvC, a, b, coefficient, 2.0, 3.0);
-            CHECK(mvC == (a | b));
-            CHECK(coefficient == 1.0 + 6.0 * computeSign(a, b));
-        }
-
-    // blades with a common basis vector: the outer product is null
-    unsigned int mvC = 42;
-    double coefficient = 1.0;
-    getSignAndBladeOuterProduct(mvC, 0b011, 0b110, coefficient, 2.0, 3.0);
-    CHECK(coefficient == 1.0);
-    CHECK(mvC == 42u);
 }
 
 TEST_CASE("combinations", "[utilities]") {

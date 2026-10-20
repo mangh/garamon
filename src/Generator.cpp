@@ -111,10 +111,6 @@ std::string generateLibrary(const std::string &configurationFile,
     writeGeneratedFile(data, docDirectory + "/Doxyfile-html.cmake");
 
 
-    // move the image
-    //copyBin(templateFile("doc/images/garamon.png"), docImageDirectory + "/garamon.png");
-
-
     // mv HOWTO files
     copyTemplateFile(templateFile("doc/HOWTO/HOWTO-build"), docHowToDirectory + "/HOWTO-build");
     copyTemplateFile(templateFile("doc/HOWTO/HOWTO-doc"),   docHowToDirectory + "/HOWTO-doc");

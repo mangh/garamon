@@ -9,16 +9,10 @@
 
 #include "Utilities.hpp"
 
-#include <bitset>
+#include <algorithm>
 #include <iomanip>
 #include <limits>
 #include <sstream>
-
-
-// compute the factorial
-unsigned int factorial(unsigned int n) {
-    return (n <= 1) ? 1 : n * factorial(n - 1);
-}
 
 
 // New version: Iterative version of the binomial Coefficient without computing the factorial
@@ -47,44 +41,6 @@ void computePerGradeStartingIndex(const unsigned int &dimension, std::vector<int
     perGradeStartingIndex.push_back(currentIndex);
     if(currentGrade + 1 < dimension){ // (not 'currentGrade < dimension-1': unsigned underflow for dimension 0)
         computePerGradeStartingIndex(dimension,perGradeStartingIndex,currentIndex, currentGrade+1);
-    }
-}
-
-
-unsigned int hammingWeight(unsigned int word){
-    return (unsigned int)std::bitset<32>(word).count();
-}
-
-
-int computeSign(const unsigned int mv1, const unsigned int mv2){
-    unsigned int nbOfOnes = 0;
-    unsigned int tmpmva = mv1;
-    tmpmva = tmpmva >> 1;
-    while(tmpmva!=0){
-        // Count number of ones in common
-        nbOfOnes += hammingWeight(tmpmva & mv2);
-        tmpmva = tmpmva >> 1;
-    }
-    return (-2*(nbOfOnes%2))+1;
-}
-
-
-// mv1 and mv2 are binary expression of some basis vectors (i.e. e23 -> 0110)
-// this function computes the binary expression of the basis vector containing the result of mv1^mv2,
-// as well as the sign corresponding to the number of permutations required to order mv1^mv2.
-unsigned int outerProductBinaryComponents(const unsigned int mv1, const unsigned int mv2, int &sign){
-    sign = computeSign(mv1, mv2);
-    return mv1^mv2;
-}
-
-
-void getSignAndBladeOuterProduct(unsigned int& mvC, const unsigned int mvA, const unsigned int mvB, double& coeffC, const double coeffA, const double coeffB){
-
-    int sign = 1;
-
-    if( (mvA & mvB) == 0){ // if mvA and mvB has some common vector basis, the outer product will be 0
-        mvC = outerProductBinaryComponents(mvA, mvB, sign);
-        coeffC += sign * coeffA * coeffB;
     }
 }
 

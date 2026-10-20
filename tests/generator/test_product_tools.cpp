@@ -58,6 +58,8 @@ TEST_CASE("xor index <-> (grade, position) tables", "[product_tools]") {
 }
 
 TEST_CASE("blade product predicates and signs", "[product_tools]") {
+    CHECK(ProductTools::hammingWeight(0xFFFFFFFFu) == 32u);
+
     for(unsigned int a = 0; a < 32; ++a)
         for(unsigned int b = 0; b < 32; ++b) {
             INFO("blades " << a << ", " << b);
@@ -173,12 +175,4 @@ TEST_CASE("scale of the inverse pseudo-scalar", "[product_tools]") {
     Eigen::MatrixXd p3ga = Eigen::MatrixXd::Identity(4, 4);
     p3ga(0, 0) = 0;
     CHECK(getScaleInversePseudoScalar(p3ga) == 0.0);
-}
-
-TEST_CASE("product component ordering is a strict weak ordering", "[product_tools]") {
-    productComponent<double> a{1, 2, 3, 1.0};
-    productComponent<double> b{1, 2, 4, 1.0};
-    CHECK(compareProductComponents(a, b));
-    CHECK_FALSE(compareProductComponents(b, a));
-    CHECK_FALSE(compareProductComponents(a, a)); // irreflexive
 }

@@ -9,6 +9,7 @@
 
 
 #include "MetricTools.hpp"
+#include "ProductTools.hpp"
 #include "Utilities.hpp"
 
 
@@ -143,21 +144,6 @@ Eigen::MatrixXd eigenRefinement(Eigen::MatrixXd &P, Eigen::MatrixXd &D, Eigen::M
 
 
 // check if the clean up of the matrices still leads to a set of matrices whose product is equal to the initial metric.
-bool checkNumericalCleanUp(const Eigen::MatrixXd &M, const Eigen::MatrixXd &P, const Eigen::MatrixXd & A, const double epsilon){
-
-    Eigen::MatrixXd M2 = P * A * P.transpose();
-    Eigen::MatrixXd nullMatrix = (M - M2).cwiseAbs();
-
-    for(unsigned int i=0; i<(unsigned int)M.rows(); ++i)
-        for(unsigned int j=0; j<(unsigned int)M.cols(); ++j)
-            if(nullMatrix(i,j) > epsilon)
-                return false;
-
-    return true;
-}
-
-
-// check if the clean up of the matrices still leads to a set of matrices whose product is equal to the initial metric.
 bool checkNumericalCleanUp(const Eigen::MatrixXd &M,
                            const Eigen::MatrixXd &P,
                            const Eigen::MatrixXd &A,
@@ -207,22 +193,6 @@ double numericalCleanUpValue(const double value, const double epsilon){
 
     // no nice value found: keep the original value
     return value;
-}
-
-
-// when pertinent, replace a supposed integer value by the nearby int, etc.
-Eigen::SparseMatrix<double> numericalCleanUpSparse(const Eigen::MatrixXd &M, const double epsilon){
-
-    Eigen::SparseMatrix<double> N(M.rows(),M.cols());
-
-    for(unsigned int i=0; i<(unsigned int)M.rows(); ++i)
-        for(unsigned int j=0; j<(unsigned int)M.cols(); ++j){
-            const double value = numericalCleanUpValue(M(i,j), epsilon);
-            if(value != 0.0)
-                N.insert(i,j) = value;
-        }
-
-    return N;
 }
 
 
@@ -305,19 +275,19 @@ Eigen::SparseMatrix<double, Eigen::ColMajor> computePerGradeTransformationMatrix
                 for(unsigned int k=0; k<nextVector.size(); ++k) {
 
                     // index initialisation
-                    unsigned int mvC = 0;
                     unsigned int mvA = currentVector[i];
                     unsigned int mvB = nextVector[k];
 
                     // coefficient computation
                     double coeffA = currentCoeffs[i];
                     double coeffB = vectorTransformationMatrix(sequence[l][j+1],k);
-                    double coeffC = 0.0; // To be changed with the transformation matrix
-                    if((coeffA != 0.0) && (coeffB != 0.0)){
-                        getSignAndBladeOuterProduct(mvC, mvA, mvB, coeffC, coeffA, coeffB);
+
+                    // the outer product of two blades with a common basis vector is null
+                    if((coeffA != 0.0) && (coeffB != 0.0) && ProductTools::outerProductExists(mvA, mvB)){
+                        double coeffC = ProductTools::outerProductSign(mvA, mvB) * coeffA * coeffB;
                         // update the results
                         if(coeffC !=0.0) {
-                            resultIdxTmp.push_back(mvC);
+                            resultIdxTmp.push_back(ProductTools::productResultXorIndex(mvA, mvB));
                             resultCoeffTmp.push_back(coeffC);
                         }
                     }

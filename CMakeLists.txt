@@ -6,9 +6,8 @@ project(garamon_generator)
 set(CMAKE_CXX_STANDARD 20)
 message(DEBUG "CMAKE_CXX_STANDARD ${CMAKE_CXX_STANDARD}")
 
-# CMAKE_CXX_STANDARD is not a reuirement, but a preference.
-# It may "decay" to a previous standard if the requested is not available.
-set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+# CMAKE_CXX_STANDARD 20 is a requirement:
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 message(DEBUG "CMAKE_CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED}")
 
 # To avoid portability issues, language extensions (enabled by default)

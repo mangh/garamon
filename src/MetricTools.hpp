@@ -43,11 +43,7 @@ Eigen::MatrixXd numericalCleanUp(const Eigen::MatrixXd &M, const double epsilon)
 
 Eigen::VectorXd vectorNumericalCleanUp(const Eigen::VectorXd& original, const double epsilon);
 
-bool checkNumericalCleanUp(const Eigen::MatrixXd &M, const Eigen::MatrixXd &P, const Eigen::MatrixXd &A, const double epsilon);
-
 bool checkNumericalCleanUp(const Eigen::MatrixXd &M, const Eigen::MatrixXd &P, const Eigen::MatrixXd &A, const Eigen::MatrixXd &Pinv, const double epsilon);
-
-Eigen::SparseMatrix<double> numericalCleanUpSparse(const Eigen::MatrixXd &M, const double epsilon);
 
 Eigen::SparseMatrix<double, Eigen::ColMajor> computePerGradeTransformationMatrix(const Eigen::MatrixXd &vectorTransformationMatrix,
                                          const unsigned int dimension, const unsigned int grade, const double epsilon);

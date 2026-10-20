@@ -16,15 +16,10 @@
 #define GARAGEN_DIRECTORY_HPP__
 
 #include <string>
-#include <vector>
 
 void makeDirectory(const std::string &dirName);
 
-bool directoryExists(const std::string &dirName);
-
 bool directoryOrFileExists(const std::string &dirName);
-
-bool directoryOrFileExists_ifstream(const std::string& name);
 
 std::string readFile(const std::string& fileName);
 
@@ -35,10 +30,6 @@ void substitute(std::string &data, const std::string &pattern, const std::string
 
 // concatenate a directory and a file/directory name, adding a '/' separator if needed (i.e. "dir" + "file" => "dir/file", "dir/" + "file" => "dir/file")
 std::string joinPath(const std::string &directory, const std::string &name);
-
-bool copyBin(const std::string &src, const std::string &dest);
-
-bool copyText(const std::string &src, const std::string &dest);
 
 
 #endif  // GARAGEN_DIRECTORY_HPP__

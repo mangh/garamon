@@ -9,9 +9,8 @@
 
 #include "ProductTools.hpp"
 
-#include <bitset>
+#include <bit>
 #include <map>
-#include <iostream>
 
 
 // fills the [xor to pos/grade] and the [pos/grade to xor] arrays.
@@ -59,7 +58,7 @@ ProductTools::~ProductTools() {}
 
 
 unsigned int ProductTools::hammingWeight(const unsigned int xorIndexMv) {
-    return (unsigned int)std::bitset<32>(xorIndexMv).count();
+    return (unsigned int)std::popcount(xorIndexMv);
 }
 
 
@@ -321,9 +320,9 @@ std::vector<std::list<productComponent<double>>> ProductTools::generateExplicitG
 
 
 std::vector<std::list<productComponent<double>>> ProductTools::generateExplicitGeometricProductList(const unsigned int gradeMv1,const unsigned int gradeMv2,
-                                                                                    Eigen::SparseMatrix<double, Eigen::ColMajor>& transformationMatrixMv1,
-                                                                                    Eigen::SparseMatrix<double, Eigen::ColMajor>& transformationMatrixMv2,
-                                                                                    std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& transformationMatricesMv3,
+                                                                                    const Eigen::SparseMatrix<double, Eigen::ColMajor>& transformationMatrixMv1,
+                                                                                    const Eigen::SparseMatrix<double, Eigen::ColMajor>& transformationMatrixMv2,
+                                                                                    const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& transformationMatricesMv3,
                                                                                     const Eigen::VectorXd& diagonalMetric) const{
     std::vector<std::list<productComponent<double>>> outputListOfProducts(dimension+1);
     // As we ignore the inner and outer products contributions. Thus, all products whose resulting grade is gradeOuter=gradeMv1+gradeMv2 or gradeInner=abs(gradeMv1-gradeMv2) will be ignored
@@ -361,15 +360,8 @@ std::vector<std::list<productComponent<double>>> ProductTools::generateExplicitG
                     // in a sparse vector, add only non-zero values, furthermore ignore the outer and inner product contributions
                     if((resultingCoefficient !=0) && (gradeOfResult!=gradeOuter) && (gradeOfResult!=gradeInner)){
                         // If the vector whose grade is gradeOfResult is not already initialized then initialize with the correct size
-                        if(mv3Ortho.count(gradeOfResult)!= 0){
-                            // already exists
-                            mv3Ortho[gradeOfResult].coeffRef(indexOfResult) += resultingCoefficient;
-                        }else{
-                            // else create the sparse vector with the correct size
-                            Eigen::SparseVector<double,Eigen::ColMajor> tmpMv3Result(transformationMatricesMv3[gradeOfResult].cols());
-                            tmpMv3Result.coeffRef(indexOfResult) += resultingCoefficient;
-                            mv3Ortho[gradeOfResult] = tmpMv3Result;
-                        }
+                        auto itMv3Ortho = mv3Ortho.try_emplace(gradeOfResult, transformationMatricesMv3[gradeOfResult].cols()).first;
+                        itMv3Ortho->second.coeffRef(indexOfResult) += resultingCoefficient;
                     }
                 }
             } // end of: compute the coefficient of the current product, in the orthogonal basis
@@ -378,8 +370,8 @@ std::vector<std::list<productComponent<double>>> ProductTools::generateExplicitG
             // note that the result might have more than 1 grade thus we have loop over all possible grades of the result
             // except the grades corresponding to the outer and inner products
             // for each grade of the resulting multivector, compute the result in the original basis
-            for(auto & iteratorResultingVectors : mv3Ortho){
-                Eigen::SparseVector<double, Eigen::ColMajor> mv3 = transformationMatricesMv3[iteratorResultingVectors.first] * iteratorResultingVectors.second;
+            for(const auto & [gradeMv3, vectorMv3Ortho] : mv3Ortho){
+                Eigen::SparseVector<double, Eigen::ColMajor> mv3 = transformationMatricesMv3[gradeMv3] * vectorMv3Ortho;
                 // add all non-zero component to the resulting list of product component
                 for (Eigen::SparseVector<double>::InnerIterator itMv3(mv3); itMv3; ++itMv3) {
                     productComponent<double> currentProduct;
@@ -390,28 +382,13 @@ std::vector<std::list<productComponent<double>>> ProductTools::generateExplicitG
                         currentProduct.indexOfMv2 = indexMv2;
                         currentProduct.indexOfMv3 = itMv3.index();
                         currentProduct.coefficient = itMv3.value();
-                        outputListOfProducts[iteratorResultingVectors.first].push_back(currentProduct);
+                        outputListOfProducts[gradeMv3].push_back(currentProduct);
                     }
                 }
             }// end of: compute the coefficient of the current product, in the original basis
         }
     }
     return outputListOfProducts;
-}
-
-
-void ProductTools::displayGradeToXorIndices() const{
-    std::cout<<"size xor to grade pos = "<<xorIndexToGradeAndPosition.size()<<std::endl;
-    for(unsigned int i=0;i<xorIndexToGradeAndPosition.size();++i){
-        std::cout<<"xor index = "<< i << ", grade is " <<xorIndexToGradeAndPosition[i].first<< ", position is "<< xorIndexToGradeAndPosition[i].second <<std::endl;
-    }
-    std::cout<<"size grade pos to xor = "<<gradePositionToXorIndex.size()<<std::endl;
-    for(unsigned int i=0;i<gradePositionToXorIndex.size();++i) {
-        for (unsigned int j = 0; j < gradePositionToXorIndex[i].size(); ++j) {
-            std::cout << "grade = " << i << ", position " << j << ", xor index = " << gradePositionToXorIndex[i][j]
-                      << std::endl;
-        }
-    }
 }
 
 

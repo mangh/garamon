@@ -359,8 +359,8 @@ std::string reverseSignArrayToString(const unsigned int &dimension){
 std::string xorIndexToGradeAndHomogeneousIndexArraysToString(unsigned int dimension, const ProductTools& product){
     std::string outputString = "";
 
-    std::string stringXorToGrade="    constexpr unsigned int xorIndexToGrade[] = {";
-    std::string stringXorToHomogeneousIndex="    constexpr unsigned int xorIndexToHomogeneousIndex[] = {";
+    std::string stringXorToGrade="    inline constexpr unsigned int xorIndexToGrade[] = {";
+    std::string stringXorToHomogeneousIndex="    inline constexpr unsigned int xorIndexToHomogeneousIndex[] = {";
 
     // for each xor index in the range 0 to 2^dim
     for(unsigned int xorIndices=0;xorIndices<(unsigned int)((1<<dimension)-1);++xorIndices){
@@ -383,11 +383,11 @@ std::string fastDualUtilitiesBasisChange(unsigned int dimension, const ProductTo
                                          const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> >& inverseTransformationMatrices,
                                          const Eigen::VectorXd &diagonalMetric,
                                          double scaleInversePseudoScalar,
-                                         std::string srcDirectory,
+                                         const std::string &srcDirectory,
                                          std::string& fastDualComponents){
-    std::string outputStringPermutations="    const std::array<std::vector<unsigned int>, " + std::to_string(dimension+1) + "> dualPermutations = {{ ";
+    std::string outputStringPermutations="    inline const std::array<std::vector<unsigned int>, " + std::to_string(dimension+1) + "> dualPermutations = {{ ";
 
-    std::string outputStringCoefficients="\n    const std::array<Eigen::Matrix<double, Eigen::Dynamic,1>, "+std::to_string(dimension+1)+"> dualCoefficients = loadFastDualArray<double>(); /*!< array containing some basis change coefficients required to compute the dual */\n    "; // replace by load
+    std::string outputStringCoefficients="\n    inline const std::array<Eigen::Matrix<double, Eigen::Dynamic,1>, "+std::to_string(dimension+1)+"> dualCoefficients = loadFastDualArray<double>(); /*!< array containing some basis change coefficients required to compute the dual */\n    "; // replace by load
 
     std::vector<double> dualCoefficientsComponents;
 
@@ -484,7 +484,7 @@ std::string fastRightComplementUtilities(const unsigned int dimension,
                                          std::string &fastDualComponents) {
 
     // declare the permutation array
-    std::string outputStringPermutations = "    const std::array<std::vector<unsigned int>, " + std::to_string(dimension+1) + "> dualPermutations = {{ ";
+    std::string outputStringPermutations = "    inline const std::array<std::vector<unsigned int>, " + std::to_string(dimension+1) + "> dualPermutations = {{ ";
 
     // declare the right complement coefficient (+/-1) array
     std::vector<double> dualCoefficientsComponents;
@@ -548,7 +548,7 @@ std::string fastRightComplementUtilities(const unsigned int dimension,
 
     // set the instruction to load the Eigen compatible sign change source code
     std::string outputStringCoefficients = "\n"
-                                           "    const std::array<Eigen::Matrix<double, Eigen::Dynamic,1>, " + std::to_string(dimension+1) + "> dualCoefficients = loadFastDualArray<double>(); /*!< array containing the coefficients needed to compute the dual */ \n    ";
+                                           "    inline const std::array<Eigen::Matrix<double, Eigen::Dynamic,1>, " + std::to_string(dimension+1) + "> dualCoefficients = loadFastDualArray<double>(); /*!< array containing the coefficients needed to compute the dual */ \n    ";
 
     // return the source code including the permutation array and the laoding sign change instruction
     return outputStringPermutations + outputStringCoefficients;
@@ -562,15 +562,15 @@ std::string fastRightComplementUtilities(const unsigned int dimension,
 std::string fastDualUtilities(unsigned int dimension, const ProductTools& product,
                               const Eigen::VectorXd &diagonalMetric,
                               double scaleInversePseudoScalar,
-                              std::string srcDirectory,
+                              const std::string &srcDirectory,
                               std::string& fastDualComponents){
 
-    std::string outputStringPermutations="    std::array<std::vector<unsigned int>, " + std::to_string(dimension+1) + "> dualPermutations = {{ ";
+    std::string outputStringPermutations="    inline const std::array<std::vector<unsigned int>, " + std::to_string(dimension+1) + "> dualPermutations = {{ ";
 
     // this string was previously initialized at library compile time. Now this is done in a similar way to the construction of the transformation matrices
     // loading it in a file
     std::string outputStringCoefficients = "\n"
-                                           "    const std::array<Eigen::Matrix<double, Eigen::Dynamic,1>, " + std::to_string(dimension+1) + "> dualCoefficients = loadFastDualArray<double>(); /*!< array containing the coefficients needed to compute the dual */ \n    ";
+                                           "    inline const std::array<Eigen::Matrix<double, Eigen::Dynamic,1>, " + std::to_string(dimension+1) + "> dualCoefficients = loadFastDualArray<double>(); /*!< array containing the coefficients needed to compute the dual */ \n    ";
 
     std::vector<double> dualCoefficientsComponents;
 
@@ -651,8 +651,8 @@ std::string fastDualUtilities(unsigned int dimension, const ProductTools& produc
 // generate the prototype of BasisTransformComponents
 std::string basisTransformMatricesLoad(){
     std::string outputString="";
-    outputString += "    template<typename T>\n    const std::array<Eigen::SparseMatrix<T, Eigen::ColMajor>,project_dim_plus_one> transformationMatrices = loadMatrices<T>(); /*!< set transformation matrices to transform a k-vector from the orhogonal basis to the original basis */\n";
-    outputString += "    template<typename T>\n    const std::array<Eigen::SparseMatrix<T, Eigen::ColMajor>,project_dim_plus_one> transformationMatricesInverse = loadMatricesInverse<T>(); /*!< set transformation matrices to transform a k-vector from the original basis to the orhogonal basis */\n";
+    outputString += "    template<typename T>\n    inline const std::array<Eigen::SparseMatrix<T, Eigen::ColMajor>,project_dim_plus_one> transformationMatrices =loadMatrices<T>(); /*!< set transformation matrices to transform a k-vector from the orhogonal basis to the original basis */\n";
+    outputString += "    template<typename T>\n    inline const std::array<Eigen::SparseMatrix<T, Eigen::ColMajor>,project_dim_plus_one> transformationMatricesInverse =loadMatricesInverse<T>(); /*!< set transformation matrices to transform a k-vector from the original basis to the orhogonal basis */\n";
 
     return outputString;
 }
@@ -737,45 +737,6 @@ std::string diagonalMetricToString(const MetaData& metaData){
 }
 
 
-/// \todo TO REMOVE change the generated function from "project" to "toOrthogonalBasis" and "toOriginalBasis"
-std::string templateVectorToOrthogonalBasisToString(){
-    std::string result = "Mvec project() const {\n"
-            "            Mvec mvProjected;\n"
-            "            for(auto & itMv : this->mvData)\n"
-            "                mvProjected.mvData[itMv.first] = (transformationMatricesInverse<T>[itMv.first]*itMv.second); // (transformationMatricesInverse<T>[itMv.first]*itMv.second)\n"
-            "            return mvProjected;\n"
-            "        }\n"
-            "\n"
-            "        Mvec backProject() const {\n"
-            "            Mvec mvBackProjected;\n"
-            "            for(auto & itMv : this->mvData){\n"
-            "                if((itMv.second.array() != 0.0).any()){\n"
-            "                    // Compute the change of basis for mv2: from non-orthogonal to orthogonal\n"
-            "                    mvBackProjected.mvData[itMv.first] = (transformationMatrices<T>[itMv.first] * itMv.second);\n"
-            "                }\n"
-            "            }\n"
-            "            return mvBackProjected;\n"
-            "        }";
-    return result;
-}
-
-std::string templateTransformVectorToOrthogonalBasisToString(){
-    std::string result = "Mvec<T> mv1Ortho;\n"
-            "        Mvec<T> mv2Ortho;\n"
-            "        Mvec<T> resultOrtho;\n"
-            "\n"
-            "        // transformation matrix applied to mv1\n"
-            "        mv1Ortho = this->project();\n"
-            "        mv2Ortho = mv2.project();";
-    return result;
-}
-
-std::string templateTransformVectorToOriginalBasisToString(){
-    std::string result = "mv3 = resultOrtho.backProject();";
-    return result;
-}
-
-
 
 
 /*******************************************************************************************************
@@ -789,11 +750,6 @@ std::string outerProductExplicitComments(const unsigned int gradeMv1, const unsi
     outerFunctionComments += "/// \\param mv2 - the second homogeneous multivector of grade " + std::to_string(gradeMv2) + " represented as a Eigen::VectorXd\n\t";
     outerFunctionComments += "/// \\param mv3 - the result of mv1^mv2, which is also a homogeneous multivector of grade " + std::to_string(gradeMv3) + "\n\t";
     return outerFunctionComments;
-}
-
-
-std::string outerProductExplicitPrototype(const unsigned int gradeMv1, const unsigned int gradeMv2){
-    return "template<typename T>\n\tvoid outer_"+std::to_string(gradeMv1)+"_"+std::to_string(gradeMv2)+"(const Eigen::Matrix<T, Eigen::Dynamic, 1>& mv1, const Eigen::Matrix<T, Eigen::Dynamic, 1>& mv2, Eigen::Matrix<T, Eigen::Dynamic, 1>& mv3){\n";
 }
 
 
@@ -913,6 +869,13 @@ std::string generateOuterExplicit_cpp(const MetaData &metaData, const ProductToo
 }
 
 
+// type of the pointer on an explicit product function: void product(const Eigen::Matrix &mv1, const Eigen::Matrix &mv2, Eigen::Matrix &mv3)
+// (plain function pointers, unlike std::function: no type erasure, and the arrays of pointers are compile time constants)
+std::string productFunctionPointerType(){
+    return "void(*)(const Eigen::Matrix<T, Eigen::Dynamic, 1>&, const Eigen::Matrix<T, Eigen::Dynamic, 1>&, Eigen::Matrix<T, Eigen::Dynamic, 1>&)";
+}
+
+
 // generate an array of function pointers referring to each explicit products.
 // Start with the declaration of the 2D array of functions pointer, then fill it.
 // Note that the size of this functions pointer is (dimension+1)*(dimension+1) because a mv can have (dimension+1) kvectors
@@ -920,8 +883,8 @@ std::string generateOuterExplicitFunctionsPointer(const unsigned int &dimension)
 
     // string that will contain the result
     std::string outputString = "template<typename T>\n"
-                                       "\tstd::array<std::array<std::function<void(const Eigen::Matrix<T, Eigen::Dynamic, 1> & , "
-                                       "const Eigen::Matrix<T, Eigen::Dynamic, 1> & , Eigen::Matrix<T, Eigen::Dynamic, 1>&)>, "+ std::to_string(dimension+1)+">, "+ std::to_string(dimension+1)+"> outerFunctionsContainer = {{\n";
+                               "\tinline constexpr std::array<std::array<" + productFunctionPointerType() + ", "
+                               + std::to_string(dimension+1) + ">, " + std::to_string(dimension+1) + "> outerFunctionsContainer = {{\n";
 
     // for all couple of grades
     for(unsigned int gradeMv1=0; gradeMv1<=dimension; ++gradeMv1){
@@ -1000,29 +963,6 @@ std::string generateInnerRecursiveBasisChange(const unsigned int gradeMv1, const
 }
 
 
-std::string generateInnerRecursiveBasisChangeFloat64(const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3, const unsigned int dimension) {
-
-    //std::string outputString = "\t\tmv3 = Mvec<double>::transformationMatricesInverse[" + std::to_string(gradeMv3) + "]*mv3;\n";
-    std::string outputString = "\t\tEigen::Matrix<double, Eigen::Dynamic, 1> tmp = Eigen::Matrix<double, Eigen::Dynamic, 1>::Zero(" + std::to_string(bin_coeff(dimension,gradeMv3)) + ");\n";
-    // call the fine recursive product (right or left contraction)
-
-    if(gradeMv3 == (gradeMv2-gradeMv1))
-        outputString += "\t\tleftContractionProductHomogeneous<double>";
-    else
-        outputString += "\t\trightContractionProductHomogeneous<double>";
-
-    // put the arguments
-    outputString += "(transformationMatricesInverse<T>[" + std::to_string(gradeMv1) + "]*mv1,"
-                    + "transformationMatricesInverse<T>[" + std::to_string(gradeMv2) + "]*mv2,tmp,"
-                    + std::to_string(gradeMv1) + "," + std::to_string(gradeMv2) + "," + std::to_string(gradeMv3) + ");\n";
-
-    // change basis for mv3
-    outputString += "\t\tmv3 += transformationMatrices<T>[" + std::to_string(gradeMv3) + "]*tmp;\n";
-
-    return outputString;
-}
-
-
 std::string generateInnerRecursive(const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3) {
 
     // call the fine recursive product (right or left contraction)
@@ -1030,15 +970,6 @@ std::string generateInnerRecursive(const unsigned int gradeMv1, const unsigned i
         return std::string("\t\tleftContractionProductHomogeneous<T>(mv1,mv2,mv3," + std::to_string(gradeMv1) + "," + std::to_string(gradeMv2) + "," + std::to_string(gradeMv3) + ");\n");
     else
         return std::string("\t\trightContractionProductHomogeneous<T>(mv1,mv2,mv3," + std::to_string(gradeMv1) + "," + std::to_string(gradeMv2) + "," + std::to_string(gradeMv3) + ");\n");
-}
-
-std::string generateInnerRecursiveFloat64(const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3) {
-
-    // call the fine recursive product (right or left contraction)
-    if(gradeMv3 == (gradeMv2-gradeMv1))
-        return std::string("\t\tleftContractionProductHomogeneous<double>(mv1,mv2,mv3," + std::to_string(gradeMv1) + "," + std::to_string(gradeMv2) + "," + std::to_string(gradeMv3) + ");\n");
-    else
-        return std::string("\t\trightContractionProductHomogeneous<double>(mv1,mv2,mv3," + std::to_string(gradeMv1) + "," + std::to_string(gradeMv2) + "," + std::to_string(gradeMv3) + ");\n");
 }
 
 
@@ -1108,8 +1039,8 @@ std::string generateInnerExplicit_cpp(const MetaData &metaData,
 
 //// return a string containing all the explicit per-grade inner product functions, 
 std::string generateInnerExplicitBasisChange_cpp(const MetaData &metaData,
-                                                 std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> > transformationMatrices,
-                                                 std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor> > inverseTransformationMatrices,
+                                                 const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor>> &transformationMatrices,
+                                                 const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor>> &inverseTransformationMatrices,
                                                  const ProductTools& product){
 
     // string that will contain the result
@@ -1185,8 +1116,8 @@ std::string generateInnerExplicitFunctionsPointer(const unsigned int &dimension)
 
     // string that will contain the result
     std::string outputString = "template<typename T>\n"
-                                       "\tstd::array<std::array<std::function<void(const Eigen::Matrix<T, Eigen::Dynamic, 1> & , "
-                                       "const Eigen::Matrix<T, Eigen::Dynamic, 1> & , Eigen::Matrix<T, Eigen::Dynamic, 1>&)>, "+ std::to_string(dimension+1)+">, "+ std::to_string(dimension+1)+"> innerFunctionsContainer = {{\n";
+                               "\tinline constexpr std::array<std::array<" + productFunctionPointerType() + ", "
+                               + std::to_string(dimension+1) + ">, " + std::to_string(dimension+1) + "> innerFunctionsContainer = {{\n";
 
     // create an entry for each couple of (gradeMv1,gradeMv2)
     for(unsigned int gradeMv1=0; gradeMv1<=dimension; ++gradeMv1){
@@ -1230,20 +1161,6 @@ std::string geometricProductExplicitComments(const unsigned int gradeMv1, const 
 }
 
 
-std::string generateGeometricRecursive(const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3) {
-
-    // call the fine recursive product (geometric product)
-    return std::string("\t\tgeoProduct<T>(mv1,mv2,mv3," + std::to_string(gradeMv1) + "," + std::to_string(gradeMv2) + "," + std::to_string(gradeMv3) + ");\n");
-}
-
-std::string generateGeometricRecursiveFloat64(const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3) {
-
-    // call the fine recursive product (geometric product)
-    return std::string("\t\tgeoProduct<double>(mv1,mv2,mv3," + std::to_string(gradeMv1) + "," + std::to_string(gradeMv2) + "," + std::to_string(gradeMv3) + ");\n");
-}
-
-
-
 //// return a string containing all the explicit per-grade inner product functions
 bool geometricProductFunctionExists(const MetaData &metaData, const unsigned int gradeMv1, const unsigned int gradeMv2, const unsigned int gradeMv3){
 
@@ -1280,15 +1197,9 @@ std::string generateGeometricExplicit_cpp(const MetaData &metaData,
         for(unsigned int gradeMv2=0; gradeMv2<=metaData.dimension; ++gradeMv2){
 
             // do not create explicit product for too big multivectors (then recursive calls)
-            if( (bin_coeff(metaData.dimension,gradeMv1)>metaData.maxDimPrecomputedProducts) || (bin_coeff(metaData.dimension,gradeMv2)>metaData.maxDimPrecomputedProducts) ){
-                    // generate a call to the fine recursive outer product
-                    // if(metaData.inputMetricDiagonal)  // without basis change
-                    //     outputString += generateGeometricRecursive(gradeMv1, gradeMv2, gradeMv3);
-                    // else  // with basis change
-                    //     outputString += generateGeometricRecursiveBasisChange(gradeMv1, gradeMv2, gradeMv3, metaData.dimension);
-
+            // (the geometric product of these k-vectors is computed by the recursive function, see recursiveGeometricProductCallToString)
+            if( (bin_coeff(metaData.dimension,gradeMv1)>metaData.maxDimPrecomputedProducts) || (bin_coeff(metaData.dimension,gradeMv2)>metaData.maxDimPrecomputedProducts) )
                 continue;
-            }
 
             // generate all products for this 'resultingGrade'
             std::vector<std::list<productComponent<double>>> listOfProducts = product.generateExplicitGeometricProductListEuclideanSpace(gradeMv1,
@@ -1326,8 +1237,8 @@ std::string generateGeometricExplicit_cpp(const MetaData &metaData,
 
 //// return a string containing all the explicit per-grade geometric product functions
 std::string generateGeometricExplicitBasisChange_cpp(const MetaData &metaData,
-                                                     std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor>> transformationMatrices,
-                                                     std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor>> inverseTransformationMatrices,
+                                                     const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor>> &transformationMatrices,
+                                                     const std::vector<Eigen::SparseMatrix<double, Eigen::ColMajor>> &inverseTransformationMatrices,
                                                      const ProductTools& product){
 
     // string that will contain the result
@@ -1390,8 +1301,7 @@ std::string generateGeometricExplicitFunctionsPointer(const MetaData &metaData){
 
     // string that will contain the result
     std::string outputString = "template<typename T>\n"
-                                       "\tstd::array<std::array<std::array<std::function<void(const Eigen::Matrix<T, Eigen::Dynamic, 1> & , "
-                                       "const Eigen::Matrix<T, Eigen::Dynamic, 1> & , Eigen::Matrix<T, Eigen::Dynamic, 1>&)>, "
+                               "\tinline constexpr std::array<std::array<std::array<" + productFunctionPointerType() + ", "
                                + std::to_string(metaData.dimension+1) + ">, " + std::to_string(metaData.dimension+1) + ">, "
                                + std::to_string(metaData.dimension+1) + "> geometricFunctionsContainer =\n\t{{\n";
 
@@ -1436,20 +1346,25 @@ std::string recursiveGeometricProductCallToString(const unsigned int maxSize, bo
               + ") || (itMv2.vec.size()>=" + std::to_string(maxSize)
               + ") ){\n";
 
+    // the recursive product computes all the grades of the product in a temporary multivector, which is then added to mv3:
+    // (the recursive product may create null k-vectors, and the result of an operation should not contain any null k-vector)
+    output += "                   Mvec<T> tmp;\n";
     if(changeMetricToOrtrhogonal){
-        output += "                   Mvec<T> tmp;\n";
         output += "                   // geometric product from mv1 and mv2 in the orthogonal basis\n";
         output += "                   geoProduct<T>(transformationMatricesInverse<T>[itMv1.grade]*itMv1.vec, transformationMatricesInverse<T>[itMv2.grade]*itMv2.vec, tmp, itMv1.grade, itMv2.grade, itMv1.grade + itMv2.grade);\n";
-        output += "                   for(auto & itMvTmp : tmp.mvData){\n";
-        output += "                       auto it = mv3.createVectorXdIfDoesNotExist(itMvTmp.grade);\n";
+    }else{
+        output += "                   geoProduct<T>(itMv1.vec, itMv2.vec, tmp, itMv1.grade, itMv2.grade, itMv1.grade + itMv2.grade);\n";
+    }
+    output += "                   for(auto & itMvTmp : tmp.mvData){\n";
+    output += "                       auto it = mv3.createVectorXdIfDoesNotExist(itMvTmp.grade);\n";
+    if(changeMetricToOrtrhogonal){
         output += "                       // back transform the result in the original basis\n";
         output += "                       it->vec += transformationMatrices<T>[itMvTmp.grade] * itMvTmp.vec;\n";
-        output += "                       if(!((it->vec.array() != 0.0).any())){\n";
-        output += "                           mv3.mvData.erase(it);\n                       }\n                   }\n";
-
     }else{
-        output += "                   geoProduct<T>(itMv1.vec, itMv2.vec, mv3, itMv1.grade, itMv2.grade, itMv1.grade + itMv2.grade);\n";
+        output += "                       it->vec += itMvTmp.vec;\n";
     }
+    output += "                       mv3.eraseIfNull(it); // (also updates the grade bitmap)\n";
+    output += "                   }\n";
 
     output += "                   continue;\n                }\n";
 
@@ -1457,30 +1372,6 @@ std::string recursiveGeometricProductCallToString(const unsigned int maxSize, bo
 }
 
 
-std::string recursiveGeometricProductCallToStringFloat64(const unsigned int maxSize, bool changeMetricToOrtrhogonal){
-    std::string output = "\n                // choose iterative or recursive\n";
-    output += "                if( (itMv1.vec.size()>=" + std::to_string(maxSize)
-              + ") || (itMv2.vec.size()>=" + std::to_string(maxSize)
-              + ") ){\n";
-
-    if(changeMetricToOrtrhogonal){
-        output += "                   Mvec<double> tmp;\n";
-        output += "                   // geometric product from mv1 and mv2 in the orthogonal basis\n";
-        output += "                   geoProduct<double>(transformationMatricesInverse<double>[itMv1.grade]*itMv1.vec, transformationMatricesInverse<double>[itMv2.grade]*itMv2.vec, tmp, itMv1.grade, itMv2.grade, itMv1.grade + itMv2.grade);\n";
-        output += "                   for(auto & itMvTmp : tmp.mvData){\n";
-        output += "                       auto it = mv3.createVectorXdIfDoesNotExist(itMvTmp.grade);\n";
-        output += "                       // back transform the result in the original basis\n";
-        output += "                       it->vec += transformationMatrices<double>[itMvTmp.grade] * itMvTmp.vec;\n";
-        output += "                       if(!((it->vec.array() != 0.0).any())){\n";
-        output += "                           mv3.mvData.erase(it);\n                       }\n                   }\n";
-    }else{
-        output += "                   geoProduct<double>(itMv1.vec, itMv2.vec, mv3, itMv1.grade, itMv2.grade, itMv1.grade + itMv2.grade);\n";
-    }
-
-    output += "                   continue;\n                }\n";
-
-    return output;
-}
 
 
 

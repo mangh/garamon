@@ -57,9 +57,9 @@ namespace project_namespace{
 
     constexpr unsigned int algebraDimension = project_algebra_dimension; /*!< dimension of the algebra (number of  basis vectors of grade 1) */
 
-    constexpr unsigned int project_per_grade_starting_index;  /*!< array specifying the index of each first element of grade k in the full multivector */
+    inline constexpr unsigned int project_per_grade_starting_index;  /*!< array specifying the index of each first element of grade k in the full multivector */
 
-    constexpr unsigned int project_array_binomial_coefficient;  /*!< array of the (dimension + 1) first binomial coefficients */
+    inline constexpr unsigned int project_array_binomial_coefficient;  /*!< array of the (dimension + 1) first binomial coefficients */
 
 project_array_xorIndexConversion
 
@@ -67,16 +67,17 @@ project_dual_arrays_permutations_and_coefficients
 
 project_pseudo_scalar_inverse
     constexpr bool fastDualAvailable = project_fast_dual_available; /*!< true if the dual of each basis blade is a single basis blade (computed with a permutation and a scaling), else the dual is computed from its definition */
-    const int project_sign_reverse; /*!< array of signs to avoid the computation of (-1)^k*(k-1)/2 during the reverse operation */
+    inline constexpr int project_sign_reverse; /*!< array of signs to avoid the computation of (-1)^k*(k-1)/2 during the reverse operation */
 
-    const std::vector<std::string> basisVectors = project_basis_vectors_string; /*!< name of the basis vectors (of grade 1) */
+    // (inline variables: a single instance shared by all the translation units including this file)
+    inline const std::vector<std::string> basisVectors = project_basis_vectors_string; /*!< name of the basis vectors (of grade 1) */
 
-    const std::string metric =
+    inline const std::string metric =
 project_metric; /*!< metric / quadratic form of the algebra (inner product between basis vectors) */
 
 
     template<class T>
-    const T zero = 0;
+    inline const T zero = 0;
 
     const unsigned int scalar = 0;
 project_basis_vector_index    /*!< defines the constants for the cga */

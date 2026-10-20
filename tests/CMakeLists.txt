@@ -98,6 +98,6 @@ foreach(algebra c3ga c5ga e3ga p3ga)
 endforeach()
 
 # test algebras covering other code paths of the generator (see the comments in the configuration files)
-foreach(algebra m3ga n3ga)
+foreach(algebra m3ga n3ga rc3ga rm3ga rp3ga)
   garamon_add_algebra_tests(${algebra} "${CMAKE_CURRENT_SOURCE_DIR}/conf/${algebra}.conf")
 endforeach()

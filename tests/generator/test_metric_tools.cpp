@@ -128,11 +128,6 @@ TEST_CASE("numerical clean up", "[metric_tools]") {
     const Eigen::MatrixXd cleanedMatrix = numericalCleanUp(m, epsilon);
     CHECK(maxAbs(cleanedMatrix.row(0).transpose() - cleaned) == 0.0);
     CHECK(maxAbs(cleanedMatrix.row(1).transpose() + cleaned) == 0.0);
-
-    // sparse version: zeros are not stored, the values that can not be rounded are kept
-    const Eigen::SparseMatrix<double> sparse = numericalCleanUpSparse(m, epsilon);
-    CHECK(sparse.nonZeros() == 14);
-    CHECK(maxAbs(Eigen::MatrixXd(sparse) - cleanedMatrix) == 0.0);
 }
 
 TEST_CASE("per grade transformation matrices are the compound matrices", "[metric_tools]") {

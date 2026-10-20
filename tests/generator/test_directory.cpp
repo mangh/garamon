@@ -64,14 +64,11 @@ TEST_CASE("files and directories", "[directory]") {
         CHECK(writeFile(content, file));
         CHECK(readFile(file) == content);
         CHECK(directoryOrFileExists(file));
-        CHECK_FALSE(directoryExists(file));
-        CHECK(directoryOrFileExists_ifstream(file));
     }
 
     SECTION("read a missing file") {
         CHECK_THROWS_AS(readFile(dir.str() + "missing.txt"), std::runtime_error);
         CHECK_FALSE(directoryOrFileExists(dir.str() + "missing.txt"));
-        CHECK_FALSE(directoryOrFileExists_ifstream(dir.str() + "missing.txt"));
     }
 
     SECTION("write in a missing directory") {
@@ -80,20 +77,11 @@ TEST_CASE("files and directories", "[directory]") {
 
     SECTION("make directories") {
         const std::string sub = dir.str() + "sub";
-        CHECK_FALSE(directoryExists(sub));
+        CHECK_FALSE(directoryOrFileExists(sub));
         makeDirectory(sub);
-        CHECK(directoryExists(sub));
+        CHECK(garamon_test::fs::is_directory(sub));
         CHECK(directoryOrFileExists(sub));
         CHECK_THROWS_AS(makeDirectory(sub), std::runtime_error);               // already exists
         CHECK_THROWS_AS(makeDirectory(sub + "/a/b"), std::runtime_error);      // missing parent
-    }
-
-    SECTION("copy") {
-        const std::string src = dir.str() + "src.txt";
-        writeFile("some\ntext\n", src);
-        CHECK(copyText(src, dir.str() + "copy.txt"));
-        CHECK(readFile(dir.str() + "copy.txt") == "some\ntext\n");
-        CHECK(copyBin(src, dir.str() + "copy.bin"));
-        CHECK(readFile(dir.str() + "copy.bin") == "some\ntext\n");
     }
 }

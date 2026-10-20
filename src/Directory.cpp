@@ -11,67 +11,26 @@
 #include "Directory.hpp"
 
 #include <iostream>
-#include <cstdlib>
+#include <filesystem>
 #include <fstream>
-#include <sstream>
-#include <sys/types.h> // required for stat.h
-#include <sys/stat.h>
-
 #include <stdexcept>
+#include <system_error>
 
-
-#if defined(_WIN32) && (defined(__MINGW32__) || defined(_MSC_BUILD))
-	#include <direct.h>
-	#include <io.h>
-#endif // __WINDOWS Mingw or MSVC compiler__
+namespace fs = std::filesystem;
 
 
 void makeDirectory(const std::string &dirName) {
 
-    int nError = 0;
-
-#if defined(_WIN32)
-	nError = _mkdir(dirName.c_str()); // can be used on Windows
-#else
-    mode_t nMode = 0755; // UNIX style permissions (rwxr-xr-x, the umask still applies)
-    nError = mkdir(dirName.c_str(), nMode); // can be used on non-Windows
-#endif
-
-    // handle your error here
-    if (nError != 0) {
+    // fails if the directory already exists or if its parent directory is missing (not recursive)
+    std::error_code error;
+    if(!fs::create_directory(dirName, error))
         throw std::runtime_error("can not create directory: " + dirName);
-    }
-}
-
-
-bool directoryExists(const std::string &dirName) {
-
-    struct stat info;
-
-    if(stat( dirName.c_str(), &info ) != 0)
-        return false; // cannot access to the directory
-
-    if(info.st_mode & S_IFDIR) // in case of problem, check with: S_ISDIR()
-        return true;
-
-    return false;  // file exists but is not a directory
 }
 
 
 bool directoryOrFileExists(const std::string &dirName) {
-
-    struct stat info;
-
-    if(stat( dirName.c_str(), &info ) == 0)
-        return true; // can access to the directory or file
-
-    return false;
-}
-
-
-bool directoryOrFileExists_ifstream (const std::string& name) {
-    std::ifstream f(name.c_str());
-    return f.good();
+    std::error_code error; // (an inaccessible path does not exist)
+    return fs::exists(dirName, error);
 }
 
 
@@ -143,24 +102,4 @@ std::string joinPath(const std::string &directory, const std::string &name) {
         return directory + name;
 
     return directory + "/" + name;
-}
-
-
-bool copyBin(const std::string &src, const std::string &dest) {
-
-    std::ifstream srcFile(src, std::ios::binary);
-    std::ofstream destFile(dest, std::ios::binary);
-    destFile << srcFile.rdbuf();
-
-    return srcFile && destFile;
-}
-
-
-bool copyText(const std::string &src, const std::string &dest) {
-
-    std::ifstream srcFile(src);
-    std::ofstream destFile(dest);
-    destFile << srcFile.rdbuf();
-
-    return srcFile && destFile;
 }

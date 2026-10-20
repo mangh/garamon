@@ -19,6 +19,7 @@
 
 // External Includes
 #include <Eigen/Core>
+#include <algorithm>
 #include <list>
 #include <iostream>
 #include <cmath>
@@ -336,7 +337,7 @@ namespace project_namespace{
         template<typename U>
         friend Mvec<U> operator!(const Mvec<U> &mv);
 
-        /// \brief boolean operator that tests the equality between two Mvec
+        /// \brief boolean operator that tests the equality between two Mvec (mv1 != mv2 is rewritten by the compiler as !(mv1 == mv2))
         /// \param mv2 - second operand of type Mvec
         /// \return whether two Mvec have the same coefficients
         inline bool operator==(const Mvec& mv2) const {
@@ -349,14 +350,6 @@ namespace project_namespace{
         /// \brief compute the inverse of a multivector
         /// \return - the inverse of the current multivector
         Mvec<T> inv() const;
-
-
-            /// \brief operator to test whether two Mvec have not the same coefficients
-        /// \param mv2 - second operand of type Mvec
-        /// \return boolean that specify the non-equality between two Mvec
-        inline bool operator!=(const Mvec& mv2) const {
-            return !(*this == mv2); // issue #4 fixed by replacing Not !(mvData == mv2.mvData) with !(*this == mv2)
-        }
 
         /// \brief Display all the non-null basis blades of this objects
         /// \param stream - destination stream
@@ -382,107 +375,27 @@ namespace project_namespace{
         /// \return the coefficient of the multivector corresponding to the "idx" component.
         /// \todo handle the cases when the number of indices is higher than the dimension, and when the index is too high
         T& operator[](const int idx ){
-
-            const unsigned int grade = xorIndexToGrade[idx];
-            const unsigned int idxHomogeneous = xorIndexToHomogeneousIndex[idx];
-
-            auto it = mvData.begin();
-            while(it != mvData.end()){
-
-                // if grade not reach yet, continue
-                if(it->grade < grade)
-                    ++it;
-                else{
-
-                    // if grade found
-                    if(it->grade == grade)
-                        return it->vec[idxHomogeneous];
-
-                    // if grade exceed, create it and inster it before the current element
-                    Kvec<T> kvec = {Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(binomialArray[grade]),grade};
-                    auto it2 = mvData.insert(it,kvec);
-                    gradeBitmap |= 1 << (grade);
-                    return it2->vec[idxHomogeneous];
-                }
-            }
-
-            // if the searched element should be added at the end, add it
-            Kvec<T> kvec = {Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(binomialArray[grade]),grade};
-
-            auto it2 = mvData.insert(mvData.end(),kvec);
-            gradeBitmap |= 1 << (grade);
-            return it2->vec[idxHomogeneous];
+            // the k-vector is created (null) if the multivector does not contain it yet
+            return createVectorXdIfDoesNotExist(xorIndexToGrade[idx])->vec[xorIndexToHomogeneousIndex[idx]];
         }
 
         /// \brief Overload the [] operator to copy a basis blade of this multivector. As an example, float a = mv[E12].
         /// \param idx - the basis vector index related to the query.
         /// \return the coefficient of the multivector corresponding to the "idx" component.
         const T& operator[](const int idx) const{
-
-            const unsigned int grade = xorIndexToGrade[idx];
-            const unsigned int idxHomogeneous = xorIndexToHomogeneousIndex[idx];
-
-            auto it = mvData.begin();
-            while(it != mvData.end()){
-
-                // if grade not reach yet, continue
-                if(it->grade < grade)
-                    ++it;
-                else{
-
-                    // if grade found
-                    if(it->grade == grade)
-                        return it->vec[idxHomogeneous];
-
-                    // if grade exceed, return a reference on zero
-                    return zero<T>;
-                }
-            }
-
-            // searched element not found
-            return zero<T>;
+            // if the multivector does not contain the k-vector, return a reference on zero
+            auto it = findGrade(xorIndexToGrade[idx]);
+            return (it == mvData.end()) ? zero<T> : it->vec[xorIndexToHomogeneousIndex[idx]];
         }
-
-/*
-        /// \cond DEV
-        // Variadic operators
-        /// \brief Overload the () operator to assign a basis blade to a multivector. As an example, consider we have a Mvec a and we want to set its e23 component to 4.7, using operator(), it will consists in writing a[2,3]=4.8.
-        /// \tparam Arguments - denotes a variadic list of index
-        /// \param listIndices - the list of indices
-        /// \return the right index in the homogeneous vectorXd
-        /// \todo future work + handle the cases when the number of indices is higher than the dimension, and when the index is too high
-        template<typename... List>
-        T& operator()(List ...listIndices){
-            // operation on these arguments
-            // First determine the grade, simply use the variadic function sizeof...()
-            // This function is correct in terms of indexing
-            const int gd = sizeof...(listIndices); //
-
-            // Second, from these parameters, compute the index in the corresponding VectorXd
-            const int idx = (Binomial<algebraDimension,gd>::value-1) - computeIdxFromList(algebraDimension,gd,listIndices...);//Binomial<algebraDimension,binomCoef>::value;//binomCoef - sumB(first,listIndices...);//computeOrderingIndex<>(listIndices...);//(Binomial<algebraDimension,gd>::value-1);//-computeOrderingIndex<int,List>(4,2,listIndices...);//computeOrderingIndex<algebraDimension,gd>(listIndices...);//idxVariadic<algebraDimension,gd,first,listIndices...>::value; //computeOrderingIndex<algebraDimension,gd,listIndices...>();//idxVariadic<algebraDimension,gd,listIndices...>::value; // (Binomial<algebraDimension,gd>::value-1)- idxVariadic<algebraDimension,gd,listIndices...>::value
-
-            if(mvData.count(gd)>0)
-                return (mvData.at(gd))(idx);
-
-            mvData[gd] = Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(Binomial<algebraDimension,gd>::value);
-
-            return mvData[gd](idx);
-        }
-        /// \endcond
-*/
 
         /// \cond DEV
         /// \brief returns a multivector with one component to 1
         /// \param grade : grade of the component to enable
         /// \param index : index of the parameter in the k-vector (k = grade)
         inline Mvec componentToOne(const unsigned int grade, const int index){
-            Kvec<T> kvec;
-			kvec.vec=Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(binomialArray[grade]);
-			kvec.grade=grade;
-            kvec.vec[index] = T(1);
             Mvec mv1;
-            mv1.mvData.push_back(kvec);
-            mv1.gradeBitmap = 1 << (grade);
+            mv1.mvData.push_back(Kvec<T>{.vec = Eigen::Matrix<T, Eigen::Dynamic, 1>::Unit(binomialArray[grade], index), .grade = grade});
+            mv1.gradeBitmap = 1u << grade;
 
             return mv1;
         }
@@ -494,35 +407,14 @@ namespace project_namespace{
         /// \return nothing
         inline typename std::list<Kvec<T>>::iterator createVectorXdIfDoesNotExist(const unsigned int grade){
 
-            auto it = mvData.begin();
-            while(it != mvData.end()){
+            // the k-vectors are sorted by increasing grade: find the first one whose grade is not lower than 'grade'
+            auto it = std::ranges::find_if(mvData, [grade](const unsigned int kvecGrade){ return kvecGrade >= grade; }, &Kvec<T>::grade);
+            if(it != mvData.end() && it->grade == grade)
+                return it;
 
-                // if grade not reach yet, continue
-                if(it->grade < grade)
-                    ++it;
-                else{
-
-                    // if grade found
-                    if(it->grade == grade)
-                        return it;
-
-                    // if grade exceed, create it and inster it before the current element
-                    Kvec<T> kvec;
-					kvec.vec=Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(binomialArray[grade]);
-					kvec.grade=grade;
-                    auto it2 = mvData.insert(it,kvec);
-                    gradeBitmap |= 1 << (grade);
-                    return it2;
-                }
-            }
-
-            // if the searched element should be added at the end, add it
-            Kvec<T> kvec;
-			kvec.vec=Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(binomialArray[grade]);
-			kvec.grade=grade;
-            auto it2 = mvData.insert(mvData.end(),kvec);
-            gradeBitmap |= 1 << (grade);
-            return it2;
+            // not found: insert a null k-vector before the current element (possibly the end)
+            gradeBitmap |= 1u << grade;
+            return mvData.insert(it, Kvec<T>{.vec = Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(binomialArray[grade]), .grade = grade});
         }
 
 
@@ -586,23 +478,13 @@ namespace project_namespace{
         /// \brief search in the multivector for a Kvec of grade "grade"
         /// \return return a const iterator on the Kvec if exist, else return mvData.end()
         inline typename std::list<Kvec<T>>::const_iterator findGrade(const unsigned int & gradeToFind) const {
-            for(auto it = mvData.begin();it != mvData.end();++it){
-                if(it->grade==gradeToFind){
-                    return it;
-                }
-            }
-            return mvData.end();
+            return std::ranges::find(mvData, gradeToFind, &Kvec<T>::grade);
         }
 
         /// \brief search in the multivector for a Kvec of grade "grade"
         /// \return return an iterator on the Kvec if exist, else return mvData.end()
         inline typename std::list<Kvec<T>>::iterator findGrade(const unsigned int & gradeToFind) {
-            for(auto it = mvData.begin();it != mvData.end();++it){
-                if(it->grade==gradeToFind){
-                    return it;
-                }
-            }
-            return mvData.end();
+            return std::ranges::find(mvData, gradeToFind, &Kvec<T>::grade);
         }
 
         /// \brief return the (highest) grade of the multivector
@@ -668,31 +550,6 @@ namespace project_namespace{
         friend void traverseKVector(std::ostream &stream, const Eigen::Matrix<U, Eigen::Dynamic, 1>, unsigned int gradeMV, bool& moreThanOne);
         /// \endcond // do not comment this functions
 
-/*
-        /// \cond DEV
-        /// \brief functions that enables to  to be able to extract a component of a multivector as a multivector. As an example, mv1.e(1,3) will create a multivector whose 1,3 component will be the component of mv1.
-        /// \tparam Arguments - denotes a variadic list of index
-        /// \param listIndices - the list of indices
-        /// \return a homogeneous multivector filled with zero except the listIndices index
-        /// \todo future work + handle the cases when the number of indices is higher than the dimension, and when the index is too high
-        template<typename... List>
-        Mvec e(List ...listIndices){
-            // operation on these arguments
-            // First determine the grade, simply use the variadic function sizeof...()
-            const int gd = sizeof...(listIndices); //
-
-            // Second, from these parameters, compute the index in the corresponding VectorXd
-            const int idx = (Binomial<algebraDimension,gd>::value-1) - computeIdxFromList(algebraDimension,gd,listIndices...);
-
-            Mvec res;
-            res.mvData[gd] = Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(Binomial<algebraDimension,gd>::value);
-            res.mvData[gd](idx) = mvData[gd](idx);
-
-            return res;
-        }
-        /// \endcond // do not comment this functions
-*/
-
 
         /// \brief functions that enables to extract one component of this multivector and initialize another mv with this component
         /// \tparam Arguments - denotes a variadic list of index
@@ -730,15 +587,12 @@ project_multivector_one_component
     template<typename T>
     Mvec<T>::Mvec(const Mvec& mv) : mvData(mv.mvData), gradeBitmap(mv.gradeBitmap)
     {
-        //std::cout << "copy constructor " << std::endl;
     }
 
 
     template<typename T>
     Mvec<T>::Mvec(Mvec<T>&& multivector) : mvData(std::move(multivector.mvData)), gradeBitmap(multivector.gradeBitmap)
     {
-        // the move constructor
-        //std::cout << "move constructor" << std::endl;
     }
 
 
@@ -746,14 +600,8 @@ project_multivector_one_component
     template<typename U>
     Mvec<T>::Mvec(const Mvec<U> &mv) : gradeBitmap(mv.gradeBitmap)
     {
-        for(auto it=mv.mvData.begin(); it != mv.mvData.end(); ++it){
-            Kvec<T> kvec;
-            kvec.grade = it->grade;
-            kvec.vec = Eigen::Matrix<T, Eigen::Dynamic, 1>::Zero(binomialArray[it->grade]);
-            for(unsigned int i=0; i<it->vec.size(); ++i)
-                kvec.vec.coeffRef(i) = T(it->vec.coeff(i));
-            mvData.push_back(kvec);
-        }
+        for(const auto & kvec : mv.mvData)
+            mvData.push_back(Kvec<T>{.vec = kvec.vec.template cast<T>(), .grade = kvec.grade});
     }
 
 
@@ -762,11 +610,7 @@ project_multivector_one_component
     Mvec<T>::Mvec(const U val) : gradeBitmap(0) {
         if(val != U(0)) {
             gradeBitmap = 1;
-            Kvec<T> kvec;
-            kvec.vec =Eigen::Matrix<T, Eigen::Dynamic, 1>(1);
-            kvec.grade =0;
-            mvData.push_back(kvec);
-            mvData.begin()->vec.coeffRef(0) = val;
+            mvData.push_back(Kvec<T>{.vec = Eigen::Matrix<T, Eigen::Dynamic, 1>::Constant(1, T(val)), .grade = 0});
         }
     }
 
@@ -880,23 +724,6 @@ project_multivector_one_component
 
     template<typename T>
     Mvec<T> Mvec<T>::operator^(const Mvec<T> &mv2) const {
-#if 0 // only recursive version
-        // Loop over non-empty grade of mv1 and mv2
-        // This version (with recursive call) is only faster than the standard recursive call if
-        // the multivector mv1 and mv2 are homogeneous or near from homogeneous.
-        Mvec<T> mv3;
-        for(const auto & itMv1 : this->mvData)    // all per-grade component of mv1
-            for(const auto & itMv2 : mv2.mvData)  // all per-grade component of mv2
-            {
-                unsigned int grade_mv3 = itMv1.grade + itMv2.grade;
-                if(grade_mv3 <= algebraDimension) {
-                    auto itMv3 = mv3.createVectorXdIfDoesNotExist(grade_mv3);
-                    outerProductHomogeneous(itMv1.vec, itMv2.vec, itMv3->vec,
-                                            itMv1.grade, itMv2.grade, grade_mv3);
-                }
-            }
-        return mv3;
-#else // use the adaptative pointer function array
         // Loop over non-empty grade of mv1 and mv2
         // call the right explicit unrolled outer function using the functions pointer called outerFunctionsContainer
         Mvec<T> mv3;
@@ -909,7 +736,6 @@ project_multivector_one_component
                 }
             }
         return mv3;
-#endif
     }
 
     template<typename U, typename S>
@@ -1505,9 +1331,6 @@ project_singular_metric_comment_end
 
     // static unit multivector functions (returns a multivector with only one component)
 project_static_multivector_one_component
-
-    //    template<typename U>
-    //    void recursiveTraversalMultivector(std::ostream &stream, const Mvec<U> &mvec, unsigned int currentGrade, int currentIndex, std::vector<int> listBasisBlades, unsigned int lastIndex, unsigned int gradeMV, bool& moreThanOne);
 
 
 
