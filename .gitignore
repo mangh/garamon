@@ -38,3 +38,6 @@ out/*
 
 # clangd index
 .cache/
+
+# Visual Studio work folder
+.vs/
