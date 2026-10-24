@@ -6,6 +6,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <Eigen/Core>
+
 #include "ConfigParser.hpp"
 #include "TestHelpers.hpp"
 

@@ -14,7 +14,6 @@
 #ifndef GARAGEN_CONFIG_PARSER_HPP__
 #define GARAGEN_CONFIG_PARSER_HPP__
 
-#include <iostream>
 #include <vector>
 #include <string>
 

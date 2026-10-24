@@ -1,6 +1,5 @@
 // Garamon unit tests: c3ga, hand-computed expectations (formerly plugin/c3gaUnitTests.cpp)
 
-#include <cmath>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>

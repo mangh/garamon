@@ -10,10 +10,13 @@
 
 #include "Directory.hpp"
 
-#include <iostream>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <iterator>
 #include <stdexcept>
+#include <string>
 #include <system_error>
 
 namespace fs = std::filesystem;

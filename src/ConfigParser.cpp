@@ -12,11 +12,20 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstddef>
+#include <exception>
 #include <fstream>
-#include <sstream>
+#include <ios>
+#include <iostream>
 #include <iterator>
 #include <limits>
+#include <ostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
+
+#include <Eigen/Core>
 
 ConfigParser::ConfigParser(const std::string &filename) {
 

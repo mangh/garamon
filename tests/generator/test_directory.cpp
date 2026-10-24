@@ -1,5 +1,6 @@
 // Garamon unit tests: src/Directory.cpp
 
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 

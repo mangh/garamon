@@ -17,9 +17,10 @@
 
 #include <vector>
 #include <utility>     // pairs
-#include <Eigen/Dense> // use the metric which is dense
-#include <Eigen/Sparse> // use the transformation matrices which are sparse
 #include <list>
+
+#include <Eigen/Core>       // use the metric which is dense
+#include <Eigen/SparseCore> // use the transformation matrices which are sparse
 
 
 /// In the computation of mv3 = mv1^mv2, this represents a quadruplet containing the indices of mv1,mv2,mv3 and a coefficient in a product between two blades.

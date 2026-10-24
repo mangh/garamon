@@ -3,7 +3,7 @@
 #include <cmath>
 #include <vector>
 
-#include <e3ga/Mvec.hpp>
+#include <e3ga/Mvec.hpp> // IWYU pragma: keep
 
 namespace ga = e3ga;
 #define GA_TAG "[e3ga]"

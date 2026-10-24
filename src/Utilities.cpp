@@ -10,9 +10,12 @@
 #include "Utilities.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <iomanip>
 #include <limits>
 #include <sstream>
+#include <string>
+#include <vector>
 
 
 // New version: Iterative version of the binomial Coefficient without computing the factorial

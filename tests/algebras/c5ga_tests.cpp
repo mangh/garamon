@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-#include <c5ga/Mvec.hpp>
+#include <c5ga/Mvec.hpp> // IWYU pragma: keep
 
 namespace ga = c5ga;
 #define GA_TAG "[c5ga]"

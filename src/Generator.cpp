@@ -12,16 +12,24 @@
 /// \brief Core of the library generator.
 
 
-#include <iostream>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 #include "Generator.hpp"
 #include "MetaData.hpp"
+#include "MetricTools.hpp"
 #include "Directory.hpp"
 #include "Utilities.hpp"
+#include "ProductTools.hpp"
 #include "ProductToString.hpp"
 
 
@@ -179,7 +187,7 @@ std::string generateLibrary(const std::string &configurationFile,
     }else{
 
         // compute the scale used to compute the inverse pseudo-scalar
-        double signedPseudoScalar = (getScaleInversePseudoScalar(metaData.metric) * pow(-1,(metaData.dimension*(metaData.dimension-1))/2));
+        double signedPseudoScalar = (getScaleInversePseudoScalar(metaData.metric) * std::pow(-1,(metaData.dimension*(metaData.dimension-1))/2));
         substitute(data,"project_pseudo_scalar_inverse", "    constexpr double pseudoScalarInverse = " + doubleToString(signedPseudoScalar) + "; /*!< compute the inverse of the pseudo scalar */\n");
 
         // fast dual

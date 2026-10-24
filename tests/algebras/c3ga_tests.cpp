@@ -1,10 +1,9 @@
 // Garamon unit tests: conformal geometric algebra of R3 (conf/c3ga.conf)
 // (see also c3ga_legacy_tests.cpp: hand-computed expectations, formerly plugin/c3gaUnitTests.cpp)
 
-#include <array>
 #include <vector>
 
-#include <c3ga/Mvec.hpp>
+#include <c3ga/Mvec.hpp> // IWYU pragma: keep
 
 namespace ga = c3ga;
 #define GA_TAG "[c3ga]"

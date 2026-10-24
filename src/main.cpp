@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <exception>
+#include <string>
 
 #include <CLI/CLI.hpp>
 #include "Generator.hpp"

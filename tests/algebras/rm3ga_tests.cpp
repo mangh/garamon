@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <rm3ga/Mvec.hpp>
+#include <rm3ga/Mvec.hpp> // IWYU pragma: keep
 
 namespace ga = rm3ga;
 #define GA_TAG "[rm3ga]"

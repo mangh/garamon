@@ -24,10 +24,12 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <string>
+#include <vector>
 
-// Internal Includes
-#include "project_namespace/Utility.hpp"
-#include "project_namespace/Constants.hpp"
+// Internal Includes (Mvec.hpp is the header to include to use the library: it exports the constants and the utilities)
+#include "project_namespace/Utility.hpp"   // IWYU pragma: export
+#include "project_namespace/Constants.hpp" // IWYU pragma: export
 
 #include "project_namespace/Outer.hpp"
 #include "project_namespace/Inner.hpp"

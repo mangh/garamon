@@ -15,11 +15,9 @@
 #ifndef GARAGEN_METADATA_HPP__
 #define GARAGEN_METADATA_HPP__
 
-#include <iostream>
 #include <vector>
 #include <string>
 #include <Eigen/Core>
-#include "MetricTools.hpp"
 
 class ConfigParser;
 

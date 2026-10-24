@@ -1,12 +1,16 @@
 // Garamon unit tests: src/MetricTools.cpp
 
 #include <cmath>
+#include <cstddef>
 #include <vector>
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/LU> // IWYU pragma: keep (MatrixBase::determinant() is declared in Core but defined in LU)
+#include <Eigen/SparseCore>
 
 #include "MetricTools.hpp"
 #include "Utilities.hpp"

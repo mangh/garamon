@@ -16,10 +16,11 @@
 #ifndef GARAGEN_METRICTOOLS_HPP
 #define GARAGEN_METRICTOOLS_HPP
 
-#include <Eigen/Core>
+#include <utility>
 #include <vector>
-#include <Eigen/Sparse>
-#include <Eigen/LU> // for inverting
+
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 
 bool isMatrixDiagonal(const Eigen::MatrixXd &metric, const double epsilon);

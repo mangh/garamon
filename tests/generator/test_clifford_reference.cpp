@@ -1,6 +1,7 @@
 // Garamon unit tests: self tests of the reference implementation tests/algebras/reference/CliffordReference.hpp
 // (the generated libraries are checked against it, so it must be right)
 
+#include <cstddef>
 #include <random>
 #include <vector>
 

@@ -8,16 +8,20 @@
 // A a copy of the MIT License is given along with this program
 
 
-#include <math.h>
-#include <set>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
+#include <iostream>
+#include <ostream>
+#include <set>
 #include <stdexcept>
+#include <string>
 
-#include <Eigen/Eigenvalues>
+#include <Eigen/Core>
 
 #include "MetaData.hpp"
 #include "ConfigParser.hpp"
+#include "MetricTools.hpp"
 
 
 MetaData::MetaData() {}
@@ -109,7 +113,7 @@ bool MetaData::checkConsistency() const {
             bool symetric = true;
             for(unsigned int i=0; i<(unsigned int)metric.rows(); ++i)
                 for(unsigned int j=i; j<(unsigned int)metric.cols(); ++j)
-                    if(fabs(metric(i,j) - metric(j,i)) > epsilon)
+                    if(std::fabs(metric(i,j) - metric(j,i)) > epsilon)
                         symetric = false;
             if (!symetric) {
                 std::cout << "error: the metric is not a symmetric matrix." << std::endl;

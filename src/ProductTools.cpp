@@ -9,8 +9,17 @@
 
 #include "ProductTools.hpp"
 
+#include <algorithm>
 #include <bit>
+#include <cstddef>
+#include <cstdlib>
+#include <list>
 #include <map>
+#include <vector>
+
+#include <Eigen/Core>
+#include <Eigen/LU> // IWYU pragma: keep (MatrixBase::determinant() is declared in Core but defined in LU)
+#include <Eigen/SparseCore>
 
 
 // fills the [xor to pos/grade] and the [pos/grade to xor] arrays.

@@ -16,12 +16,13 @@
 #pragma once
 
 
-#include <Eigen/Sparse>
+#include <Eigen/Core>
 #include <vector>
 #include <array>
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <string>
 
 
 /*!

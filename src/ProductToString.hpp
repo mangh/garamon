@@ -15,8 +15,12 @@
 #ifndef GARAGEN_PRODUCTTOSTRING_HPP
 #define GARAGEN_PRODUCTTOSTRING_HPP
 
+#include <list>
 #include <string>
 #include <vector>
+
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 #include "MetaData.hpp"
 #include "ProductTools.hpp"

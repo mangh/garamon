@@ -24,7 +24,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
-#include <string>
 #include <vector>
 
 namespace garamon_test {

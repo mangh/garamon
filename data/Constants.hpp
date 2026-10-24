@@ -41,11 +41,10 @@
 
 #include <array>
 #include <vector>
-#include <utility>
 #include <string>
-#include <Eigen/Sparse>
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
-#include "project_namespace/Utility.hpp"
 #include "project_namespace/BasisTransformations.hpp"
 #include "project_namespace/DualCoefficients.hpp"
 

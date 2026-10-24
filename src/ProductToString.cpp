@@ -8,8 +8,22 @@
 // A a copy of the MIT License is given along with this program
 
 #include "ProductToString.hpp"
+#include "MetaData.hpp"
+#include "MetricTools.hpp"
+#include "ProductTools.hpp"
 #include "Utilities.hpp"  // for binomial
 #include "Directory.hpp"  // for substitute
+
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+#include <list>
+#include <string>
+#include <vector>
+
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 
 
@@ -347,7 +361,7 @@ std::string reverseSignArrayToString(const unsigned int &dimension){
     std::string resSignReverse = "signReversePerGrade["+std::to_string(dimension+1)+"] = {";
 
     for(unsigned int i=0;i<=dimension;++i){
-        resSignReverse += std::to_string((int)pow(-1,(i*(i-1))/2));
+        resSignReverse += std::to_string((int)std::pow(-1,(i*(i-1))/2));
         if(i<dimension) resSignReverse += ",";
     }
 
