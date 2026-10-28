@@ -20,7 +20,7 @@
 /// Garamon is a C++ library to represent an manipulate the geometric algebra objects.
 /// \section install_bigsec How to install
 /// \subsection dependencies_sec Dependecies
-/// \li cmake (at least version 3.10)
+/// \li cmake (at least version 3.14)
 /// \li Eigen (at least version 3.3.4)
 /// \li Doxygen (if you want the documentation)
 /// \subsection install_sec Install with cmake (Linux / MacOs)

@@ -41,12 +41,12 @@ const std::set<std::string> &templatePlaceholders() {
 
 std::vector<std::string> expectedFiles(const std::string &name) {
     return {
-        "CMakeLists.txt", "README.md", "LICENCE.txt", "cheatSheet.txt",
+        "CMakeLists.txt", "README.md", "LICENCE.txt", "cheatSheet.txt", "cmake/" + name + "Config.cmake.in",
         "doc/CMakeLists.txt", "doc/Doxyfile-html.cmake", "doc/HOWTO/HOWTO-build", "doc/HOWTO/HOWTO-doc", "doc/HOWTO/HOWTO-test",
-        "sample/CMakeLists.txt", "sample/sample.py", "sample/src/main.cpp", "sample/modules/FindEigen.cmake",
+        "sample/CMakeLists.txt", "sample/sample.py", "sample/src/main.cpp",
         "src/" + name + "/BasisTransformations.hpp", "src/" + name + "/Constants.hpp", "src/" + name + "/DualCoefficients.hpp",
         "src/" + name + "/Geometric.hpp", "src/" + name + "/GeometricExplicit.hpp", "src/" + name + "/Inner.hpp",
-        "src/" + name + "/InnerExplicit.hpp", "src/" + name + "/Mvec.cpp", "src/" + name + "/Mvec.hpp", "src/" + name + "/Outer.hpp",
+        "src/" + name + "/InnerExplicit.hpp", "src/" + name + "/Mvec.hpp", "src/" + name + "/Outer.hpp",
         "src/" + name + "/OuterExplicit.hpp", "src/" + name + "/PythonBindings.cpp", "src/" + name + "/Utility.hpp"};
 }
 
@@ -77,7 +77,13 @@ TEST_CASE("generation of the tested algebras", "[generation]") {
     std::string upperCase = name;
     for(char &c : upperCase)
         c = (char)toupper(c);
-    CHECK(fs::is_regular_file(fs::path(library) / "sample" / "modules" / ("Find" + upperCase + ".cmake")));
+
+    // header-only library, found by the sample with find_package(<name> CONFIG)
+    CHECK_FALSE(fs::exists(fs::path(library) / "src" / name / "Mvec.cpp"));
+    CHECK_FALSE(fs::exists(fs::path(library) / "sample" / "modules"));
+    const std::string config = readWholeFile(fs::path(library) / "cmake" / (name + "Config.cmake.in"));
+    CHECK(config.find("include(\"${CMAKE_CURRENT_LIST_DIR}/" + name + "Targets.cmake\")") != std::string::npos);
+    CHECK(config.find("check_required_components(" + name + ")") != std::string::npos);
 
     // no placeholder is left in the generated files
     const auto &placeholders = templatePlaceholders();

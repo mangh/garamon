@@ -41,8 +41,11 @@ endforeach()
 add_library(garamon_core STATIC ${source_files})
 target_include_directories(garamon_core PUBLIC src)
 target_link_libraries(garamon_core PUBLIC Eigen3::Eigen)
-# target_compile_features(garamon_core PUBLIC cxx_std_14)
-target_compile_options(garamon_core PRIVATE $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W3,-Wall>)
+if(MSVC)
+    target_compile_options(garamon_core PRIVATE /W3)
+else()
+    target_compile_options(garamon_core PRIVATE -Wall)
+endif()
 
 # the command line generator
 add_executable(garamon_generator src/main.cpp)
@@ -54,8 +57,11 @@ target_link_libraries(garamon_generator PRIVATE
 )
 
 # compilation flags
-# target_compile_features(garamon_generator PRIVATE cxx_std_14)
-target_compile_options(garamon_generator PRIVATE $<IF:$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,/W3,-Wall>)
+if(MSVC)
+    target_compile_options(garamon_generator PRIVATE /W3)
+else()
+    target_compile_options(garamon_generator PRIVATE -Wall)
+endif()
 
 # unit tests: 'ctest' from the build directory
 if(GARAMON_BUILD_TESTS)
@@ -65,3 +71,12 @@ if(GARAMON_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
+
+# install
+
+include(GNUInstallDirs) # GNU standard directories for installation
+
+install(TARGETS garamon_generator RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(DIRECTORY data DESTINATION .)
+install(DIRECTORY conf DESTINATION .)

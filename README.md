@@ -97,7 +97,7 @@ Let us consider the considered algebra is CGA of R3 corresponding to the configu
     	* 'make'
         * './garamon_generator -c ../conf/c3ga.conf -t ../data/ -o ./output/'
     	* 'cd output/garamon_c3ga/'
-    	* 'cmake -S . -B build -DBUILD_PYTHON=ON' (¹)
+    	* 'cmake -S . -B build -DBUILD_PYTHON=ON' (¹) (²)
     	* 'cmake --build build --config Release'
     	* 'cmake --build build --config Release --target python_sample' (runs 'sample/sample.py' with the just-built module)
     	* (optional) 'cmake --install build --config Release --component python' (²) to make the module importable from anywhere, then:
@@ -108,7 +108,7 @@ Let us consider the considered algebra is CGA of R3 corresponding to the configu
 You might need to add the `-DCMAKE_PREFIX_PATH=/path/to/eigen3` parameter to point to where the library is.
 
 (2) The module is installed into the site-packages of the Python interpreter found by CMake, which usually requires admin rights (`sudo`, or an elevated terminal on Windows).
-Either install to your per-user site-packages instead, by adding `-DPYTHON_INSTALL_DIR="$(python -m site --user-site)"` to the `cmake -S ...` command,
+Either install to your per-user site-packages instead, by adding `-DPYTHON_USER_INSTALL=ON` to the `cmake -S ...` command,
 or activate a virtual environment (`python -m venv .venv`) before the `cmake -S ...` command: CMake then uses it and installs the module there.
 
 

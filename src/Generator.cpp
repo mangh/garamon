@@ -66,12 +66,12 @@ std::string generateLibrary(const std::string &configurationFile,
     std::string projectDirectory      = joinPath(outputDirectory, "garamon_" + metaData.namespaceName);
     std::string srcDirectoryMain      = projectDirectory + "/src";
     std::string srcDirectory          = projectDirectory + "/src/" + metaData.namespaceName;
+    std::string cmakeDirectory        = projectDirectory + "/cmake";
     std::string docDirectory          = projectDirectory + "/doc";
     std::string docImageDirectory     = projectDirectory + "/doc/images";
     std::string docHowToDirectory     = projectDirectory + "/doc/HOWTO";
     std::string sampleDirectory       = projectDirectory + "/sample";
     std::string srcSampleDirectory    = projectDirectory + "/sample/src";
-    std::string moduleSampleDirectory = projectDirectory + "/sample/modules";
 
     // check if the directories are not already existing
     if(directoryOrFileExists(projectDirectory))
@@ -81,12 +81,12 @@ std::string generateLibrary(const std::string &configurationFile,
     makeDirectory(projectDirectory);
     makeDirectory(srcDirectoryMain);
     makeDirectory(srcDirectory);
+    makeDirectory(cmakeDirectory);
     makeDirectory(docDirectory);
     makeDirectory(docImageDirectory);
     makeDirectory(docHowToDirectory);
     makeDirectory(sampleDirectory);
     makeDirectory(srcSampleDirectory);
-    makeDirectory(moduleSampleDirectory);
 
     // namespace in uppercase for the #ifndef guards (antidoublons) and CMakeList.txt
     std::string upperCaseNamespace = metaData.namespaceName;
@@ -103,6 +103,12 @@ std::string generateLibrary(const std::string &configurationFile,
     data = readFile(templateFile("CMakeLists.txt"));
     substitute(data,"cmake_project_name_original_case", metaData.namespaceName);
     writeGeneratedFile(data, projectDirectory + "/CMakeLists.txt");
+
+
+    // add the CMake package configuration file (find_package(<namespace> CONFIG))
+    data = readFile(templateFile("cmake/Config.cmake.in"));
+    substitute(data,"cmake_project_name_original_case", metaData.namespaceName);
+    writeGeneratedFile(data, cmakeDirectory + "/" + metaData.namespaceName + "Config.cmake.in");
 
 
     // add the documentation CMakeLists.txt
@@ -275,12 +281,6 @@ std::string generateLibrary(const std::string &configurationFile,
     writeGeneratedFile(data, srcDirectory + "/Mvec.hpp");
 
 
-    // Mvec.cpp
-    data = readFile(templateFile("Mvec.cpp"));
-    substitute(data,"project_namespace", metaData.namespaceName);
-    writeGeneratedFile(data, srcDirectory + "/Mvec.cpp");
-
-
     // Outer.hpp
     std::cout << "  outer product ..." << std::endl;
     data = readFile(templateFile("Outer.hpp"));
@@ -340,18 +340,8 @@ std::string generateLibrary(const std::string &configurationFile,
     std::cout << "  sample ..." << std::endl;
     data = readFile(templateFile("sample/CMakeLists.txt"));
     substitute(data,"cmake_project_name_sample", metaData.namespaceName + "_sample");
-    substitute(data,"cmake_project_name_upper_case", upperCaseNamespace);
     substitute(data,"cmake_project_name_original_case", metaData.namespaceName);
-    substitute(data,"cmake_project_name_original_case_py", metaData.namespaceName + "_py");
     writeGeneratedFile(data, sampleDirectory + "/CMakeLists.txt");
-
-
-    // add the sample modules
-    copyTemplateFile(templateFile("sample/modules/FindEigen.cmake"), moduleSampleDirectory + "/FindEigen.cmake");
-    data = readFile(templateFile("sample/modules/Find_myLib.cmake"));
-    substitute(data,"cmake_project_name_upper_case", upperCaseNamespace);
-    substitute(data,"cmake_project_name_original_case", metaData.namespaceName);
-    writeGeneratedFile(data, moduleSampleDirectory + "/Find" + upperCaseNamespace + ".cmake");
 
 
     // add the sample main.cpp
